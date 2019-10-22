@@ -60,6 +60,8 @@ struct Node {
     uint8_t Mode;
     uint16_t NCycles;
     unsigned char SSID[6];
+    uint16_t NFails;
+    uint8_t FirstBoot;
     uint8_t NSensors;
     uint16_t *SensorIdPtr;
     uint8_t *SensorDataLen;

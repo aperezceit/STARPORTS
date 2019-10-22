@@ -54,6 +54,7 @@
 
 #include "platform.h"
 
+#include <ti/devices/cc32xx/inc/hw_types.h>
 #include <ti/devices/cc32xx/driverlib/prcm.h>
 
 #include "hal_UART.h"
@@ -83,7 +84,7 @@ uint8_t Timer0Event = 0;
 uint8_t Timer1Event = 0;
 uint8_t LPDSOut = 0;
 
-struct Node MyNode = {NODEID,1200,MODE_NORMAL_WIFI,1,16,"PORTS0"};
+struct Node MyNode = {NODEID,1200,MODE_NORMAL_LORA,1,16,"PORTS0"};
 struct TMP006_Data MyTMP006 = {TMP006_ID};
 struct ADXL355_Data MyADXL = {ADXL355_ID,500,256};
 struct BME280_Data MyBME = {BME280_ID};
@@ -142,7 +143,8 @@ void *mainThread(void *arg0)
 
     /************ Begin Read Configuration Files **************************/
     // Muestra estado memoria y lista de archivos
-    sl_Start(0, 0, 0); // necesario arrancar device antes de trabajar con file system
+    spi = Startup_SPI(Board_SPI_MASTER, 8, 5000000); //necesario inicializar SPI antes de sl_Start
+    sl_Start(0, 0, 0);
     // st_showStorageInfo(); //no es necesario ver la info, se puede omitir
     // st_listFiles(1);
     // newFile();
@@ -178,7 +180,9 @@ void *mainThread(void *arg0)
     /************* End Configure Peripherals ***********************/
 
 
-    UART_write(uart0, "\r\nInitiating Test of STARPORTS...\r\n", 27);
+    UART_write(uart0, "\r\nInitiating Test of STARPORTS...\r\n", 35);
+
+    st_listFiles(0);
 
     /*************** Begin Setting Node Configuration Parameters */
     // Set the WakeUp_Time in RTC
@@ -208,11 +212,11 @@ void *mainThread(void *arg0)
             } else {
                 strcpy(Mess,"Join_Otaa_Lora() Failed ");
                 UART_write(uart1, Mess, 24);
-                Mess[0] = '('; M ess[1] = ret+48; Mess[2]=')';
+                Mess[0] = '('; Mess[1] = ret+48; Mess[2]=')';
                 UART_write(uart1, Mess,3);
                 UART_write(uart1, "\r\n",2);
                 MyNode.NFails++; // Write NFails File
-                NextStep=SHUTDOWN;
+//***                NextStep=SHUTDOWN;
             }
 
         } else {
@@ -223,7 +227,7 @@ void *mainThread(void *arg0)
                 // Continue reading sensors
             } else {
                 MyNode.NFails++;   // Write NFails File
-                NextStep=SHUTDOWN;
+//***                NextStep=SHUTDOWN;
             }
         }
     } else if (MyNode.Mode==MODE_NORMAL_WIFI) {
@@ -238,7 +242,7 @@ void *mainThread(void *arg0)
             } else {
                 MyNode.NFails++;
                 // Write NFails File
-                NextStep=SHUTDOWN;
+//***                NextStep=SHUTDOWN;
             }
         } else {
             // Read SSID from file
@@ -251,23 +255,23 @@ void *mainThread(void *arg0)
             } else {
                 MyNode.NFails++;
                 // Write NFails File
-                NextStep=SHUTDOWN;
+//***                NextStep=SHUTDOWN;
             }
         }
     }
     /************** End of Configuration and Setup Wireless Connectivity ***************/
 
-    if (NextStep==SHUTDOWN) {
+//***    if (NextStep==SHUTDOWN) {
         I2C_close(i2c);
-        I2C_As_GPIO_Low();  // Puts SCL and SDA signals low to save power
+//***        I2C_As_GPIO_Low();  // Puts SCL and SDA signals low to save power
         Node_Disable();     // Auto Shutdown
-    }
+//***    }
 
     /************** Begin Reading Data from Sensors ***********************************/
     /* Timer */
     Timer_init();
     /* Configure SPI Master at 5 Mbps, 8-bits, CPOL=0, PHA=0 */
-    SPI_CS_Disable();   // Put CS to Logic High
+//***    SPI_CS_Disable();   // Put CS to Logic High
     spi = Startup_SPI(Board_SPI_MASTER, 8, 5000000);
     DataPacketLen = GetSensorData(DataPacket);
 
@@ -279,10 +283,10 @@ void *mainThread(void *arg0)
     LDC1000_SPI_Enable();
     ADXL355_SPI_Enable();
     BME280_SPI_Enable();
-    SPI_As_GPIO_Low(); // Puts all rest of SPI signals to '0' to save power
+//***    SPI_As_GPIO_Low(); // Puts all rest of SPI signals to '0' to save power
 
     I2C_close(i2c);
-    I2C_As_GPIO_Low();  // Puts SCL and SDA signals low to save power
+//***    I2C_As_GPIO_Low();  // Puts SCL and SDA signals low to save power
 
     MyLoraNode.DataLenTx = Uint8Array2Char(DataPacket, DataPacketLen, MyLoraNode.DataTx);
 
@@ -298,7 +302,8 @@ void *mainThread(void *arg0)
             // Write NFails File
         }
 
-    } else if (MyNode.Mode==MODE_NORMAL_WIFI) {
+    }
+/***    else if (MyNode.Mode==MODE_NORMAL_WIFI) {
         // Transmit Data through WiFi, several tries?
         if (ret==SUCCESS_WIFI_TX) {
             // Getting Configuration Data back from AppServer
@@ -309,7 +314,7 @@ void *mainThread(void *arg0)
             // Write NFails File
         }
     }
-
+***/
     Node_Disable();
 
 }

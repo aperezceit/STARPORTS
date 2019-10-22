@@ -337,7 +337,7 @@ uint8_t Mac_Set_Devaddr(UART_Handle uart, struct LoraNode *MyLoraNode) {
     }
 
 }
-/*
+
 int Mac_Get_Upctr(UART_Handle uart) {
 
     unsigned char Command[256];
@@ -351,32 +351,8 @@ int Mac_Get_Upctr(UART_Handle uart) {
     return atoi(buf);
 
 }
-*/
+
 /*
-int Mac_Get_Upctr(UART_Handle uart, struct LoraNode *MyLoraNode) {
-
-    unsigned char Command[256];
-    unsigned char buf[32];
-    uint8_t sz;
-
-    strcpy(Command,"mac get upctr\r\n");
-    UART_write(uart, (const char *)(Command), 15);
-    UART_PRINT(Command);
-    sz = GetLine_UART(uart, buf);
-    UART_PRINT(buf);
-//    strncpy(MyLoraNode->Upctr,buf,1);
-    strncpy(MyLoraNode->Upctr,buf,strlen(buf));
-    //MyLoraNode->Upctr = atoi(buf);
-//    strcpy(Command,"\r\n mac get upctr ");
-//    strncat(Command, MyLoraNode->Upctr, 1);
-//    strcat(Command,"\r\n");
-//    UART_write(uart0, (const char *)Command, 20);
-
-    return atoi(*buf);
-    //return buf;
-
-}
-*/
 int Mac_Get_Upctr(UART_Handle uart, struct LoraNode *MyLoraNode) {
 
     unsigned char Command[256];
@@ -402,7 +378,7 @@ int Mac_Get_Upctr(UART_Handle uart, struct LoraNode *MyLoraNode) {
     //return buf;
 
 }
-
+*/
 
 uint8_t Mac_Set_Upctr(UART_Handle uart, struct LoraNode *MyLoraNode) {
     unsigned char Command[256];

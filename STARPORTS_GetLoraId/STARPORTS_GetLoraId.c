@@ -55,6 +55,7 @@
 
 #include "platform.h"
 
+#include <ti/devices/cc32xx/inc/hw_types.h>
 #include <ti/devices/cc32xx/driverlib/prcm.h>
 
 #include "hal_UART.h"

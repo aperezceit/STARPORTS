@@ -95,9 +95,9 @@ uint8_t Mac_Save(UART_Handle uart);
 
 uint8_t Mac_Adr_On(UART_Handle uart);
 
-int Mac_Get_Upctr(UART_Handle uart, struct LoraNode *MyLoraNode);
+//int Mac_Get_Upctr(UART_Handle uart, struct LoraNode *MyLoraNode);
 
-//int Mac_Get_Upctr(UART_Handle uart, int upcntr);
+int Mac_Get_Upctr(UART_Handle uart);
 
 uint8_t Mac_Set_Upctr(UART_Handle uart, struct LoraNode *MyLoraNode);
 

@@ -166,7 +166,7 @@ int st_listFiles(int bShowDescription)
 ////////////////////////
 /* Escribir en archivo*/
 ///////////////////////
-
+/*
 int writeFileKeys(_i32 fileHandle, struct LoraNode* MyLoraNode)
 {
 
@@ -227,7 +227,7 @@ int writeFileKeys(_i32 fileHandle, struct LoraNode* MyLoraNode)
 
     return offset;
 }
-
+*/
 ///////////////////
 //WRITEUPCNTR
 ///////////////////
@@ -242,10 +242,10 @@ int writeFileUpCntr(struct LoraNode* MyLoraNode)
 
     strncpy(&loraData, MyLoraNode->Upctr,32);
 
-    fd = sl_FsOpen(FILENAMEUPCNTR, SL_FS_OVERWRITE, 0);
+    fd = sl_FsOpen(FS_UPCNTR, SL_FS_OVERWRITE, 0);
     if (fd < 0)
     {
-        UART_PRINT("Error opening the file : %s\n\r", FILENAMEUPCNTR);
+        UART_PRINT("Error opening the file : %s\n\r", FS_UPCNTR);
     }
     else
     {
@@ -264,7 +264,7 @@ int writeFileUpCntr(struct LoraNode* MyLoraNode)
         RetVal = sl_FsClose(fd, 0, 0, 0);
         if (RetVal < 0)
         {
-            UART_PRINT("Error closing the file : %s\n\r", FILENAMEUPCNTR);
+            UART_PRINT("Error closing the file : %s\n\r", FS_UPCNTR);
         }
         else
         {
@@ -287,10 +287,10 @@ int st_readFileUpcntr()
 
     int32_t fd;
 
-    fd = sl_FsOpen(FILENAMEUPCNTR, SL_FS_READ, 0);
+    fd = sl_FsOpen(FS_UPCNTR, SL_FS_READ, 0);
     if (fd < 0)
     {
-        UART_PRINT("\r\nError opening the file : %s\n\r", FILENAMEUPCNTR);
+        UART_PRINT("\r\nError opening the file : %s\n\r", FS_UPCNTR);
     }
     else
     {
@@ -320,7 +320,7 @@ int st_readFileUpcntr()
     RetVal = sl_FsClose(fd, 0, 0, 0);
     if (RetVal < 0)
     {
-        UART_PRINT("Error closing the file : %s\n\r", FILENAMEUPCNTR);
+        UART_PRINT("Error closing the file : %s\n\r", FS_UPCNTR);
     }
     else
     {
@@ -332,6 +332,8 @@ int st_readFileUpcntr()
 ///////////////////
 //WRITE Nfails
 ///////////////////
+
+/*
 int writeNfails(struct LoraNode* MyLoraNode)
 {
 
@@ -375,14 +377,14 @@ int writeNfails(struct LoraNode* MyLoraNode)
 
     return offset;
 }
-
+*/
 /////////////////////
 /*Eliminar archivo*/
 ////////////////////
 int deleteFile()
 {
     UART_PRINT("\n\r\n\r ** Deleting the file\n\r");
-    sl_FsDel(FILENAMEUPCNTR, 0);
+    sl_FsDel(FS_UPCNTR, 0);
     st_listFiles(0);
     return 0;
 }
@@ -395,7 +397,7 @@ int newFile()
     int RetVal = 0;
     _i32 fd;
 
-    fd = sl_FsOpen("NFails", (SL_FS_CREATE | SL_FS_CREATE_FAILSAFE | SL_FS_CREATE_MAX_SIZE(MAX_FILE_SIZE)), 0);
+    fd = sl_FsOpen(FS_UPCNTR, (SL_FS_CREATE | SL_FS_CREATE_FAILSAFE | SL_FS_CREATE_MAX_SIZE(MAX_FILE_SIZE)), 0);
     if(fd<0)
     {
         UART_PRINT("Creating file error: %d\n\r", fd);
