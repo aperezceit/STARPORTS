@@ -823,7 +823,139 @@ int st_readFileSSID()
 ////////////////////////////////
 /*Crea archivo en File system*/
 ///////////////////////////////
-int newFile()
+int newFileWake()
+{
+    int RetVal = 0;
+    _i32 fd;
+
+    fd = sl_FsOpen(FS_WAKEUP, (SL_FS_CREATE | SL_FS_CREATE_FAILSAFE | SL_FS_CREATE_MAX_SIZE(MAX_FILE_SIZE)), 0);
+    if(fd<0)
+    {
+        UART_PRINT("Creating file error: %d\n\r", fd);
+    }
+    else
+    {
+        fd = sl_FsClose(fd, 0, 0, 0);
+        if (fd < 0)
+        {
+            UART_PRINT("Closing file error: %d\n\r", RetVal);
+        }
+    }
+
+    return fd;
+}
+
+int newFileMode()
+{
+    int RetVal = 0;
+    _i32 fd;
+
+    fd = sl_FsOpen(FS_MODE, (SL_FS_CREATE | SL_FS_CREATE_FAILSAFE | SL_FS_CREATE_MAX_SIZE(MAX_FILE_SIZE)), 0);
+    if(fd<0)
+    {
+        UART_PRINT("Creating file error: %d\n\r", fd);
+    }
+    else
+    {
+        fd = sl_FsClose(fd, 0, 0, 0);
+        if (fd < 0)
+        {
+            UART_PRINT("Closing file error: %d\n\r", RetVal);
+        }
+    }
+
+    return fd;
+}
+
+int newFileNCycles()
+{
+    int RetVal = 0;
+    _i32 fd;
+
+    fd = sl_FsOpen(FS_NCYCLES, (SL_FS_CREATE | SL_FS_CREATE_FAILSAFE | SL_FS_CREATE_MAX_SIZE(MAX_FILE_SIZE)), 0);
+    if(fd<0)
+    {
+        UART_PRINT("Creating file error: %d\n\r", fd);
+    }
+    else
+    {
+        fd = sl_FsClose(fd, 0, 0, 0);
+        if (fd < 0)
+        {
+            UART_PRINT("Closing file error: %d\n\r", RetVal);
+        }
+    }
+
+    return fd;
+}
+
+int newFileSSID()
+{
+    int RetVal = 0;
+    _i32 fd;
+
+    fd = sl_FsOpen(FS_SSID, (SL_FS_CREATE | SL_FS_CREATE_FAILSAFE | SL_FS_CREATE_MAX_SIZE(MAX_FILE_SIZE)), 0);
+    if(fd<0)
+    {
+        UART_PRINT("Creating file error: %d\n\r", fd);
+    }
+    else
+    {
+        fd = sl_FsClose(fd, 0, 0, 0);
+        if (fd < 0)
+        {
+            UART_PRINT("Closing file error: %d\n\r", RetVal);
+        }
+    }
+
+    return fd;
+}
+
+int newFileFirstBoot()
+{
+    int RetVal = 0;
+    _i32 fd;
+
+    fd = sl_FsOpen(FS_FIRST_BOOT, (SL_FS_CREATE | SL_FS_CREATE_FAILSAFE | SL_FS_CREATE_MAX_SIZE(MAX_FILE_SIZE)), 0);
+    if(fd<0)
+    {
+        UART_PRINT("Creating file error: %d\n\r", fd);
+    }
+    else
+    {
+        fd = sl_FsClose(fd, 0, 0, 0);
+        if (fd < 0)
+        {
+            UART_PRINT("Closing file error: %d\n\r", RetVal);
+        }
+    }
+
+    return fd;
+}
+
+int newFileNFails()
+{
+    int RetVal = 0;
+    _i32 fd;
+
+    fd = sl_FsOpen(FS_NFAILS, (SL_FS_CREATE | SL_FS_CREATE_FAILSAFE | SL_FS_CREATE_MAX_SIZE(MAX_FILE_SIZE)), 0);
+    if(fd<0)
+    {
+        UART_PRINT("Creating file error: %d\n\r", fd);
+    }
+    else
+    {
+        fd = sl_FsClose(fd, 0, 0, 0);
+        if (fd < 0)
+        {
+            UART_PRINT("Closing file error: %d\n\r", RetVal);
+        }
+    }
+
+    return fd;
+}
+
+int newFileUpcntr()
 {
     int RetVal = 0;
     _i32 fd;

@@ -109,6 +109,8 @@ void *mainThread(void *arg0)
 
     int upctr;
 
+    int firstTime=1;
+
     /* Timer Handle */
     Timer_Handle timer0;
 
@@ -147,6 +149,39 @@ void *mainThread(void *arg0)
     sl_Start(0, 0, 0); //necesario para poder trabajar con FS
 
     uart0 = Startup_UART(Board_UART0, 115200); // arrancado antes de leer para debug
+
+    st_listFiles(0);
+
+    if(firstTime==0)
+    {
+        newFileWake();
+        MyNode.WakeUpInterval=1200;
+        writeWakeUp(MyNode.WakeUpInterval);
+
+        newFileMode();
+        MyNode.Mode=0;
+        writeMode(MyNode.Mode);
+
+        newFileNCycles();
+        MyNode.NCycles=1;
+        writeNCycles(MyNode.NCycles);
+
+        newFileSSID();
+
+        newFileFirstBoot();
+        MyNode.FirstBoot=1;
+        writeFirstBoot(MyNode.FirstBoot);
+
+        newFileNFails();
+        MyNode.NFails=0;
+        writeNFails( MyNode.NFails);
+
+        newFileUpcntr();
+        MyLoraNode.Upctr=0;
+        writeUpCntr(MyLoraNode.Upctr);
+
+        firstTime=0;
+    }
 
     /* Get Param Values from internal filesystem */
     // Get MyNode.WakeUpInterval --> Read WakeUp_Time File
