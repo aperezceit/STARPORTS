@@ -143,27 +143,35 @@ void *mainThread(void *arg0)
 
     /************ Begin Read Configuration Files **************************/
     // Muestra estado memoria y lista de archivos
-    spi = Startup_SPI(Board_SPI_MASTER, 8, 5000000); //necesario inicializar SPI antes de sl_Start
-    sl_Start(0, 0, 0);
-    // st_showStorageInfo(); //no es necesario ver la info, se puede omitir
-    // st_listFiles(1);
-    // newFile();
+    SPI_init(); //necesario inicializar SPI antes de sl_Start
+    sl_Start(0, 0, 0); //necesario para poder trabajar con FS
+
+    uart0 = Startup_UART(Board_UART0, 115200); // arrancado antes de leer para debug
 
     /* Get Param Values from internal filesystem */
     // Get MyNode.WakeUpInterval --> Read WakeUp_Time File
+    MyNode.WakeUpInterval = st_readFileWakeUp();
     // Get MyNode.Mode --> Read File Mode
+    MyNode.Mode = st_readFileMode();
     // Get MyNode.NCycles --> Read File Ncycles
+    MyNode.NCycles = st_readFileNCycles();
     // Get MyNode.SSID[] --> Read SSID File
+//    MyNode.SSID = st_readFileSSID(); //REVISAR, LA LECTURA NO ES CORRECTA
     // Get MyNode.FirstBoot --> Read FirstBoot File: Yes (1) No (0)
+    MyNode.FirstBoot = st_readFileFirstBoot();
     // Get MyNode.NFails --> Number of failed attempts to Wireless Connection
+    MyNode.NFails=st_readFileNFails();
     /************ Ends Reading Configuration Files **************************/
 
     if (MyNode.NFails>=4) {
+        UART_PRINT("ENTRO EN IF\n\r");
         // Setup Node as WiFi and connect to Known Host
         // ...
         // ...
         MyNode.FirstBoot=TRUE; // and write to file FirstBoot
+        writeFirstBoot(MyNode.FirstBoot);
         MyNode.NFails=0; // and write to file NFails
+        writeNFails(MyNode.NFails);
     }
 
     /************* Begin Configure Peripherals ***********************/
@@ -174,15 +182,13 @@ void *mainThread(void *arg0)
     // Configures the RTC
     DS1374_Write_Ctrl(i2c);
     // UART0 is for sending debug information */
-    uart0 = Startup_UART(Board_UART0, 115200);
+//    uart0 = Startup_UART(Board_UART0, 115200);
     // UART1 connects to RN2483 */
     uart1 = Startup_UART(Board_UART1, 57600);
     /************* End Configure Peripherals ***********************/
 
-
     UART_write(uart0, "\r\nInitiating Test of STARPORTS...\r\n", 35);
 
-    st_listFiles(0);
 
     /*************** Begin Setting Node Configuration Parameters */
     // Set the WakeUp_Time in RTC
@@ -205,10 +211,13 @@ void *mainThread(void *arg0)
                 ret = Mac_Get_Devaddr(uart1, &MyLoraNode);
                 ret = Mac_Set_Devaddr(uart1, &MyLoraNode);
                 // Get upctr from RN2483 & Write to file
-                upctr = Mac_Get_Upctr(uart1);
+                MyLoraNode.Upctr = Mac_Get_Upctr(uart1);
+                writeUpCntr(MyLoraNode.Upctr);
                 ret = Mac_Save(uart1);
                 MyNode.FirstBoot = FALSE; // Write FirstBoot file
+                writeFirstBoot(MyNode.FirstBoot);
                 MyNode.NFails=0; // and write to file NFails
+                writeNFails(MyNode.NFails);
             } else {
                 strcpy(Mess,"Join_Otaa_Lora() Failed ");
                 UART_write(uart1, Mess, 24);
@@ -216,6 +225,7 @@ void *mainThread(void *arg0)
                 UART_write(uart1, Mess,3);
                 UART_write(uart1, "\r\n",2);
                 MyNode.NFails++; // Write NFails File
+                writeNFails(MyNode.NFails);
 //***                NextStep=SHUTDOWN;
             }
 
@@ -224,9 +234,11 @@ void *mainThread(void *arg0)
             // Join ABP
             if (ret==SUCCESS_ABP_LORA) {
                 MyNode.NFails=0; // and write to file NFails
+                writeNFails(MyNode.NFails);
                 // Continue reading sensors
             } else {
                 MyNode.NFails++;   // Write NFails File
+                writeNFails(MyNode.NFails);
 //***                NextStep=SHUTDOWN;
             }
         }
@@ -238,10 +250,12 @@ void *mainThread(void *arg0)
             // Connect WiFi
             if (ret==SUCCESS_CONNECT_WIFI) {
                 MyNode.FirstBoot = FALSE;  // Write FirstBoot File
+                writeFirstBoot(MyNode.FirstBoot);
                 MyNode.NFails=0; // and write to file NFails
+                writeNFails(MyNode.NFails);
             } else {
                 MyNode.NFails++;
-                // Write NFails File
+                writeNFails(MyNode.NFails);
 //***                NextStep=SHUTDOWN;
             }
         } else {
@@ -294,12 +308,15 @@ void *mainThread(void *arg0)
         ret = Tx_Uncnf_Lora(uart1, &MyLoraNode);    // Transmit Data, several tries?
         if (ret==SUCCESS_TX_MAC_TX) {
             // Get upctr from RN2483 & Write to file
+            MyLoraNode.Upctr = Mac_Get_Upctr(uart1);
+            writeUpCntr(MyLoraNode.Upctr);
             // Getting Configuration Data back from AppServer
             // Write New Configuration Data to Files
             MyNode.NFails=0; // and write to file NFails
+            writeNFails(MyNode.NFails);
         } else {
             MyNode.NFails++;
-            // Write NFails File
+            writeNFails(MyNode.NFails);
         }
 
     }

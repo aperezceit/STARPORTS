@@ -36,10 +36,21 @@ typedef struct
 
 int st_showStorageInfo();
 int st_listFiles(int bShowDescription);
-int writeFileKeys(_i32 fileHandle, struct LoraNode *MyLoraNode);
-int writeFileUpCntr(struct LoraNode* MyLoraNode);
-int readFile( _i32 fileHandle);
-int openRead(const _u8 *filename);
+int writeNFails(uint16_t NFails);
+int st_readFileNFails();
+int writeFirstBoot(uint8_t FirstBoot);
+int st_readFileFirstBoot();
+int st_readFileFirstBoot();
+int writeNCycles(uint16_t NCycles);
+int st_readFileNCycles();
+int writeUpCntr(uint32_t Upctr);
+int st_readFileUpCntr();
+int writeMode(uint8_t Mode);
+int st_readFileMode();
+int writeWakeUp(uint16_t WakeUpInterval);
+int st_readFileWakeUp();
+int writeSSID(unsigned char *SSID);
+int st_readFileSSID();
 int deleteFile();
 int newFile();
 

@@ -76,7 +76,7 @@ struct LoraNode {
     unsigned char DataRx[4];
     uint8_t DataLenRx;
     uint8_t PortNoRx;
-    unsigned char Upctr [32]; /////upcnt
+    uint32_t Upctr; /////upcnt
 };
 
 void Reset_RN2483(void);
