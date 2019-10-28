@@ -48,6 +48,7 @@
 
 
 #define SUCCESS_TX_MAC_TX           0
+#define SUCCESS_TX_MAC_RX           11
 #define ERROR_TX_MAC_ERR            1
 #define ERROR_TX_BUSY               2
 #define ERROR_TX_NOT_JOINED         3
@@ -95,7 +96,7 @@ uint8_t Mac_Save(UART_Handle uart);
 
 uint8_t Mac_Adr_On(UART_Handle uart);
 
-//int Mac_Get_Upctr(UART_Handle uart, struct LoraNode *MyLoraNode);
+uint8_t Mac_Ar_On(UART_Handle uart);
 
 int Mac_Get_Upctr(UART_Handle uart);
 
@@ -120,6 +121,8 @@ uint8_t Sys_FactoryReset(UART_Handle uart);
 void GetLoraRxData(unsigned char *buf, uint8_t size, struct LoraNode *MyLoraNode);
 
 uint8_t Uint8Array2Char(uint8_t *DataPacket, uint8_t DataPacketLen, unsigned char *HexStr);
+
+uint8_t hex2int(unsigned char *hex, uint8_t len, struct LoraNode *MyLoraNode);
 
 uint8_t IniPacket(uint8_t *DataPacket, uint16_t NodeId);
 

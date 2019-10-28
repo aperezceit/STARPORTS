@@ -6,6 +6,7 @@
  */
 
 #include <ti/drivers/GPIO.h>
+#include <unistd.h>
 #include "Board.h"
 
 
@@ -23,9 +24,27 @@ uint8_t GPIO_Config(void) {
     GPIO_setConfig(Board_EN_ADXL355,     GPIO_CFG_OUT_STD | GPIO_CFG_OUT_LOW);
     GPIO_setConfig(Board_EN_BME280,      GPIO_CFG_OUT_STD | GPIO_CFG_OUT_LOW);
     GPIO_setConfig(Board_EN_LDC1000,     GPIO_CFG_OUT_STD | GPIO_CFG_OUT_LOW);
-    GPIO_setConfig(Board_EN_NODE,        GPIO_CFG_OUT_STD | GPIO_CFG_OUT_HIGH);
-    // INTB Inputs from DS1374
-    GPIO_setConfig(Board_DS1374_INTB,    GPIO_CFG_IN_NOPULL);
+    GPIO_setConfig(Board_DS1374_INTB,    GPIO_CFG_OUT_STD | GPIO_CFG_OUT_LOW);  // This connection no longer exists, so put it low
+
+    return 0;
+
+}
+
+uint8_t I2C_As_GPIO_Low(void) {
+
+    GPIO_setConfig(Board_SCL_ASGPIO,    GPIO_CFG_OUT_STD | GPIO_CFG_OUT_LOW);
+    usleep(2000);   // Importante para evitar una condición de START en el RTC (ver datasheet DS1374)
+    GPIO_setConfig(Board_SDA_ASGPIO,    GPIO_CFG_OUT_STD | GPIO_CFG_OUT_LOW);
+
+    return 0;
+
+}
+
+uint8_t SPI_As_GPIO_Low(void) {
+
+    GPIO_setConfig(Board_SCLK_ASGPIO,    GPIO_CFG_OUT_STD | GPIO_CFG_OUT_LOW);
+    GPIO_setConfig(Board_MOSI_ASGPIO,    GPIO_CFG_OUT_STD | GPIO_CFG_OUT_LOW);
+    GPIO_setConfig(Board_CS_ASGPIO,      GPIO_CFG_OUT_STD | GPIO_CFG_OUT_LOW);
 
     return 0;
 
@@ -133,5 +152,13 @@ void LDC1000_SPI_Enable(void) {
 void LDC1000_SPI_Disable(void) {
 
     GPIO_write(Board_LDC1000_CS,1);
+
+}
+
+void SPI_CS_Disable(void) {
+
+    GPIO_write(Board_LDC1000_CS,1);
+    GPIO_write(Board_BME280_CS,1);
+    GPIO_write(Board_ADXL355_CS,1);
 
 }

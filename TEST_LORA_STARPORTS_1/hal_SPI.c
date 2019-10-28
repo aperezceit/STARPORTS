@@ -14,7 +14,7 @@ SPI_Handle Startup_SPI(uint_least8_t index, uint32_t dataSize, uint32_t dataRate
     SPI_Params spiParams;
     SPI_Handle spi;
 
-    SPI_init();
+    // Assumes SPI_init() has already been started
 
     SPI_Params_init(&spiParams);
     spiParams.mode = SPI_MASTER;

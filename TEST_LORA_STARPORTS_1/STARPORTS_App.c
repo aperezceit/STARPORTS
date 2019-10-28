@@ -78,13 +78,11 @@
 
 #define TIMEOUT_MS 10000 // 10 seconds Timeout
 
-// #define MYRTC 1
-
 uint8_t Timer0Event = 0;
 uint8_t Timer1Event = 0;
 uint8_t LPDSOut = 0;
 
-struct Node MyNode = {NODEID,1200,MODE_NORMAL_LORA,1,16,"PORTS0"};
+struct Node MyNode = {NODEID,1200,MODE_NORMAL_LORA,16,"PORTSN"};
 struct TMP006_Data MyTMP006 = {TMP006_ID};
 struct ADXL355_Data MyADXL = {ADXL355_ID,500,256};
 struct BME280_Data MyBME = {BME280_ID};
@@ -106,14 +104,6 @@ Watchdog_Handle wd; // Watchdog Handle
 
 void *mainThread(void *arg0)
 {
-
-    int upctr;
-
-    int firstTime=1;
-
-    /* Timer Handle */
-    Timer_Handle timer0;
-
     /* UART Handles */
     UART_Handle uart1;
 
@@ -131,6 +121,7 @@ void *mainThread(void *arg0)
     uint8_t ret;
     uint8_t sz;
     uint8_t NTxFail;
+    uint8_t NextStep = CONTINUE;
 
     /* wifi var */
     int16_t         sockId;
@@ -143,6 +134,9 @@ void *mainThread(void *arg0)
     // Configure the rest of GPIO pins
     ret = GPIO_Config();
 
+    /* Open a Watchdog driver instance */
+    // wd = Startup_Watchdog(Board_WATCHDOG0, TIMEOUT_MS);
+
     /************ Begin Read Configuration Files **************************/
     // Muestra estado memoria y lista de archivos
     SPI_init(); //necesario inicializar SPI antes de sl_Start
@@ -150,38 +144,38 @@ void *mainThread(void *arg0)
 
     uart0 = Startup_UART(Board_UART0, 115200); // arrancado antes de leer para debug
 
-    st_listFiles(0);
+    // st_listFiles(0);
 
-    if(firstTime==0)
-    {
-        newFileWake();
-        MyNode.WakeUpInterval=1200;
-        writeWakeUp(MyNode.WakeUpInterval);
-
-        newFileMode();
-        MyNode.Mode=0;
-        writeMode(MyNode.Mode);
-
-        newFileNCycles();
-        MyNode.NCycles=1;
-        writeNCycles(MyNode.NCycles);
-
-        newFileSSID();
-
-        newFileFirstBoot();
-        MyNode.FirstBoot=1;
-        writeFirstBoot(MyNode.FirstBoot);
-
-        newFileNFails();
-        MyNode.NFails=0;
-        writeNFails( MyNode.NFails);
-
-        newFileUpcntr();
-        MyLoraNode.Upctr=0;
-        writeUpCntr(MyLoraNode.Upctr);
-
-        firstTime=0;
-    }
+//    if(firstTime==0)
+//    {
+//        newFileWake();
+//        MyNode.WakeUpInterval=1200;
+//        writeWakeUp(MyNode.WakeUpInterval);
+//
+//        newFileMode();
+//        MyNode.Mode=0;
+//        writeMode(MyNode.Mode);
+//
+//        newFileNCycles();
+//        MyNode.NCycles=1;
+//        writeNCycles(MyNode.NCycles);
+//
+//        newFileSSID();
+//
+//        newFileFirstBoot();
+//        MyNode.FirstBoot=1;
+//        writeFirstBoot(MyNode.FirstBoot);
+//
+//        newFileNFails();
+//        MyNode.NFails=0;
+//        writeNFails( MyNode.NFails);
+//
+//        newFileUpcntr();
+//        MyLoraNode.Upctr=0;
+//        writeUpCntr(MyLoraNode.Upctr);
+//
+//        firstTime=0;
+//    }
 
     /* Get Param Values from internal filesystem */
     // Get MyNode.WakeUpInterval --> Read WakeUp_Time File
@@ -191,7 +185,7 @@ void *mainThread(void *arg0)
     // Get MyNode.NCycles --> Read File Ncycles
     MyNode.NCycles = st_readFileNCycles();
     // Get MyNode.SSID[] --> Read SSID File
-//    MyNode.SSID = st_readFileSSID(); //REVISAR, LA LECTURA NO ES CORRECTA
+    st_readFileSSID(&(MyNode.SSID));  //REVISAR, LA LECTURA NO ES CORRECTA
     // Get MyNode.FirstBoot --> Read FirstBoot File: Yes (1) No (0)
     MyNode.FirstBoot = st_readFileFirstBoot();
     // Get MyNode.NFails --> Number of failed attempts to Wireless Connection
@@ -212,12 +206,11 @@ void *mainThread(void *arg0)
     /************* Begin Configure Peripherals ***********************/
     // Reset the RN2483
     RN2483_Clear();
+
     // I2C interface started
     i2c = Startup_I2C(Board_I2C0);
     // Configures the RTC
     DS1374_Write_Ctrl(i2c);
-    // UART0 is for sending debug information */
-//    uart0 = Startup_UART(Board_UART0, 115200);
     // UART1 connects to RN2483 */
     uart1 = Startup_UART(Board_UART1, 57600);
     /************* End Configure Peripherals ***********************/
@@ -261,20 +254,22 @@ void *mainThread(void *arg0)
                 UART_write(uart1, "\r\n",2);
                 MyNode.NFails++; // Write NFails File
                 writeNFails(MyNode.NFails);
-//***                NextStep=SHUTDOWN;
+                NextStep=SHUTDOWN;
             }
 
         } else {
             // Read upctr from file
+            MyLoraNode.Upctr = st_readFileUpCntr();
+            Mac_Set_Upctr(uart1,&MyLoraNode);
             // Join ABP
+            ret = Join_Abp_Lora(uart1);
             if (ret==SUCCESS_ABP_LORA) {
                 MyNode.NFails=0; // and write to file NFails
-                writeNFails(MyNode.NFails);
                 // Continue reading sensors
             } else {
                 MyNode.NFails++;   // Write NFails File
                 writeNFails(MyNode.NFails);
-//***                NextStep=SHUTDOWN;
+                NextStep=SHUTDOWN;
             }
         }
     } else if (MyNode.Mode==MODE_NORMAL_WIFI) {
@@ -291,7 +286,7 @@ void *mainThread(void *arg0)
             } else {
                 MyNode.NFails++;
                 writeNFails(MyNode.NFails);
-//***                NextStep=SHUTDOWN;
+                NextStep=SHUTDOWN;
             }
         } else {
             // Read SSID from file
@@ -304,23 +299,21 @@ void *mainThread(void *arg0)
             } else {
                 MyNode.NFails++;
                 // Write NFails File
-//***                NextStep=SHUTDOWN;
+                NextStep=SHUTDOWN;
             }
         }
     }
     /************** End of Configuration and Setup Wireless Connectivity ***************/
 
-//***    if (NextStep==SHUTDOWN) {
+    if (NextStep==SHUTDOWN) {
         I2C_close(i2c);
-//***        I2C_As_GPIO_Low();  // Puts SCL and SDA signals low to save power
+        I2C_As_GPIO_Low();  // Puts SCL and SDA signals low to save power
         Node_Disable();     // Auto Shutdown
-//***    }
+    }
 
     /************** Begin Reading Data from Sensors ***********************************/
-    /* Timer */
-    Timer_init();
     /* Configure SPI Master at 5 Mbps, 8-bits, CPOL=0, PHA=0 */
-//***    SPI_CS_Disable();   // Put CS to Logic High
+    SPI_CS_Disable();   // Put CS to Logic High
     spi = Startup_SPI(Board_SPI_MASTER, 8, 5000000);
     DataPacketLen = GetSensorData(DataPacket);
 
@@ -332,21 +325,24 @@ void *mainThread(void *arg0)
     LDC1000_SPI_Enable();
     ADXL355_SPI_Enable();
     BME280_SPI_Enable();
-//***    SPI_As_GPIO_Low(); // Puts all rest of SPI signals to '0' to save power
-
+    SPI_As_GPIO_Low(); // Puts all rest of SPI signals to '0' to save power
     I2C_close(i2c);
-//***    I2C_As_GPIO_Low();  // Puts SCL and SDA signals low to save power
+    I2C_As_GPIO_Low();  // Puts SCL and SDA signals low to save power
 
     MyLoraNode.DataLenTx = Uint8Array2Char(DataPacket, DataPacketLen, MyLoraNode.DataTx);
 
     if (MyNode.Mode==MODE_NORMAL_LORA) {
         ret = Tx_Uncnf_Lora(uart1, &MyLoraNode);    // Transmit Data, several tries?
-        if (ret==SUCCESS_TX_MAC_TX) {
+        if (ret==SUCCESS_TX_MAC_TX || ret == SUCCESS_TX_MAC_RX) {
             // Get upctr from RN2483 & Write to file
             MyLoraNode.Upctr = Mac_Get_Upctr(uart1);
             writeUpCntr(MyLoraNode.Upctr);
-            // Getting Configuration Data back from AppServer
             // Write New Configuration Data to Files
+            writeFirstBoot(MyNode.FirstBoot);
+            writeWakeUp(MyNode.WakeUpInterval);
+            writeMode(MyNode.Mode);
+            writeSSID(&(MyNode.SSID));
+            writeNCycles(MyNode.NCycles);
             MyNode.NFails=0; // and write to file NFails
             writeNFails(MyNode.NFails);
         } else {

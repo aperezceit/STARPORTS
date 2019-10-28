@@ -68,6 +68,11 @@ extern "C" {
 #define Board_EN_BME280              CC3220SF_STARPORTS_EN_BME280
 #define Board_EN_LDC1000             CC3220SF_STARPORTS_EN_LDC1000
 #define Board_DS1374_INTB            CC3220SF_STARPORTS_DS1374_INTB
+#define Board_SCL_ASGPIO             CC3220SF_STARPORTS_SCL
+#define Board_SDA_ASGPIO             CC3220SF_STARPORTS_SDA
+#define Board_SCLK_ASGPIO            CC3220SF_STARPORTS_SCLK
+#define Board_MOSI_ASGPIO            CC3220SF_STARPORTS_MOSI
+#define Board_CS_ASGPIO              CC3220SF_STARPORTS_CS
 
 
 

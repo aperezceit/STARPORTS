@@ -15,12 +15,13 @@
 #include "hal_LORA.h"
 #include "hal_UART.h"
 #include "file_system.h"
-
+#include "STARPORTS_App.h"
 
 #include <ti/drivers/net/wifi/simplelink.h>
 
 
 extern UART_Handle uart0;
+extern struct Node MyNode;
 
 void Reset_RN2483(void) {
 
@@ -215,6 +216,9 @@ uint8_t Join_Otaa_Lora(UART_Handle uart) {
     uint8_t sz;
 
     memset(&buf,0, sizeof(buf));
+
+    Mac_Adr_On(uart);
+
     strcpy(Command,"mac join otaa\r\n");
     UART_write(uart, (const char *)Command, 15);
     UART_PRINT(Command);
@@ -304,6 +308,24 @@ uint8_t Mac_Adr_On(UART_Handle uart) {
 
 }
 
+uint8_t Mac_Ar_On(UART_Handle uart) {
+
+    unsigned char Command[256];
+    unsigned char buf[32];
+    uint8_t sz;
+
+    memset(&buf,0, sizeof(buf));
+    strcpy(Command,"mac set ar on\r\n");
+    UART_write(uart, (const char *)Command, 15);
+    sz = GetLine_UART(uart, buf);
+    if (strncmp(buf,"ok",2)==0) {
+        return 0;
+    } else {
+        return 1;
+    }
+
+}
+
 uint8_t Mac_Get_Devaddr(UART_Handle uart, struct LoraNode *MyLoraNode) {
     unsigned char Command[256];
     unsigned char buf[32];
@@ -351,34 +373,6 @@ int Mac_Get_Upctr(UART_Handle uart) {
     return atoi(buf);
 
 }
-
-/*
-int Mac_Get_Upctr(UART_Handle uart, struct LoraNode *MyLoraNode) {
-
-    unsigned char Command[256];
-    unsigned char buf[32];
-    uint8_t sz;
-
-    memset(&buf,0, sizeof(buf));
-    memset(MyLoraNode->Upctr,0, sizeof(MyLoraNode->Upctr));
-    strcpy(Command,"mac get upctr\r\n");
-    UART_write(uart, (const char *)(Command), 15);
-    UART_PRINT(Command);
-    sz = GetLine_UART(uart, buf);
-    UART_PRINT(buf);
-//    strncpy(MyLoraNode->Upctr,buf,1);
-    strncpy(MyLoraNode->Upctr,buf,strlen(buf));
-    //MyLoraNode->Upctr = atoi(buf);
-//    strcpy(Command,"\r\n mac get upctr ");
-//    strncat(Command, MyLoraNode->Upctr, 1);
-//    strcat(Command,"\r\n");
-//    UART_write(uart0, (const char *)Command, 20);
-
-    return atoi(*buf);
-    //return buf;
-
-}
-*/
 
 uint8_t Mac_Set_Upctr(UART_Handle uart, struct LoraNode *MyLoraNode) {
     unsigned char Command[256];
@@ -481,50 +475,75 @@ uint8_t Tx_Uncnf_Lora(UART_Handle uart, struct LoraNode *MyLoraNode) {
 
     unsigned char Command[256];
     unsigned char buf[40];
+    unsigned char payload[40];
+    uint8_t PortNo;
     uint8_t sz;
+    uint8_t ret;
+    uint8_t LastAnswer = FALSE;
 
+
+
+    // Set adaptive datarate ON
+    Mac_Adr_On(uart);
+
+    // Set Automatic Retransmit ON
+    Mac_Ar_On(uart);
 
     sprintf(Command,"mac tx uncnf %d ", MyLoraNode->PortNoTx);
     strncat(Command,MyLoraNode->DataTx, MyLoraNode->DataLenTx);
     strcat(Command,"\r\n");
 
-    UART_PRINT(Command);
-
+    // UART_PRINT(Command);
 
     UART_write(uart, Command, strlen(Command));
-    sz = GetLine_UART(uart, buf);
 
-    if (strncmp(buf,"ok",2)==0) {
+    while (LastAnswer==FALSE) {
         sz = GetLine_UART(uart, buf);
-        if (strncmp(buf,"mac_tx_ok",9)==0) {
-            return SUCCESS_TX_MAC_TX;
+        if (strncmp(buf,"ok",2)==0) {
+            ;
+        } else if (strncmp(buf,"mac_tx_ok",9)==0) {
+            LastAnswer=TRUE;
+            ret = SUCCESS_TX_MAC_TX;
+        } else if (strncmp(buf,"mac_rx ",7)==0) {
+            sscanf(buf,"mac_rx %d %s\r\n",&PortNo,payload);
+            hex2int(payload, strlen(payload), MyLoraNode);
+            ret = SUCCESS_TX_MAC_RX;
         } else if (strncmp(buf,"mac_err",7)==0) {
-            return ERROR_TX_MAC_ERR;
+            LastAnswer=TRUE;
+            ret = ERROR_TX_MAC_ERR;
         } else if (strncmp(buf,"invalid_data_len",16)==0) {
-            return ERROR_TX_INVALID_DATA_LEN;
+            LastAnswer=TRUE;
+            ret = ERROR_TX_INVALID_DATA_LEN;
+        } else if (strncmp(buf,"invalid_param",13)==0) {
+            LastAnswer=TRUE;
+            ret = ERROR_TX_INVALID_PARAM;
+        } else if (strncmp(buf,"not_joined",10)==0) {
+            LastAnswer=TRUE;
+            ret = ERROR_TX_NOT_JOINED;
+        } else if (strncmp(buf,"no_free_ch",10)==0) {
+            LastAnswer=TRUE;
+            ret = ERROR_TX_NO_FREE_CH;
+        } else if (strncmp(buf,"silent",6)==0) {
+            LastAnswer=TRUE;
+            ret = ERROR_TX_SILENT;
+        } else if (strncmp(buf,"frame_counter_err_rejoin_needed",31)==0) {
+            LastAnswer=TRUE;
+            ret = ERROR_TX_REJOIN_NEEDED;
+        } else if (strncmp(buf,"busy",4)==0) {
+            LastAnswer=TRUE;
+            ret = ERROR_TX_BUSY;
+        } else if (strncmp(buf,"mac_paused",10)==0) {
+            LastAnswer=TRUE;
+            ret = ERROR_TX_MAC_PAUSED;
+        } else if (strncmp(buf,"invalid_data_len",16)==0) {
+            LastAnswer=TRUE;
+            ret = ERROR_TX_INVALID_DATA_LEN;
         } else {
-            return ERROR_TX_UNKNOWN;
+            LastAnswer=TRUE;
+            ret = ERROR_TX_UNKNOWN;
         }
-    } else if (strncmp(buf,"invalid_param",13)==0) {
-        return ERROR_TX_INVALID_PARAM;
-    } else if (strncmp(buf,"not_joined",10)==0) {
-        return ERROR_TX_NOT_JOINED;
-    } else if (strncmp(buf,"no_free_ch",10)==0) {
-        return ERROR_TX_NO_FREE_CH;
-    } else if (strncmp(buf,"silent",6)==0) {
-        return ERROR_TX_SILENT;
-    } else if (strncmp(buf,"frame_counter_err_rejoin_needed",31)==0) {
-        return ERROR_TX_REJOIN_NEEDED;
-    } else if (strncmp(buf,"busy",4)==0) {
-        return ERROR_TX_BUSY;
-    } else if (strncmp(buf,"mac_paused",10)==0) {
-        return ERROR_TX_MAC_PAUSED;
-    } else if (strncmp(buf,"invalid_data_len",16)==0) {
-        return ERROR_TX_INVALID_DATA_LEN;
-    } else {
-        return ERROR_TX_UNKNOWN;
     }
-
+    return ret;
 }
 
 /*!
@@ -552,58 +571,71 @@ uint8_t Tx_Cnf_Lora(UART_Handle uart, struct LoraNode *MyLoraNode) {
 
     unsigned char Command[256];
     unsigned char buf[32];
+    unsigned char payload[40];
+    uint8_t PortNo;
     uint8_t sz;
+    uint8_t ret;
+    uint8_t LastAnswer = FALSE;
+
+    // Set adaptive datarate ON
+    Mac_Adr_On(uart);
+
+    // Set Automatic Retransmit ON
+    Mac_Ar_On(uart);
 
     sprintf(Command,"mac tx cnf %d ", MyLoraNode->PortNoTx);
-    strncat(Command,MyLoraNode->DataTx,MyLoraNode->DataLenTx);
+    strncat(Command,MyLoraNode->DataTx, MyLoraNode->DataLenTx);
     strcat(Command,"\r\n");
 
     UART_write(uart, Command, strlen(Command));
-    sz = GetLine_UART(uart, buf);
 
-    if (strncmp(buf,"ok",2)==0) {
+    while (LastAnswer==FALSE) {
         sz = GetLine_UART(uart, buf);
-        if (strncmp(buf,"mac_err",7)==0) {
-            return ERROR_TX_MAC_ERR;
+        if (strncmp(buf,"ok",2)==0) {
+            ;
+        } else if (strncmp(buf,"mac_tx_ok",9)==0) {
+            LastAnswer=TRUE;
+            ret = SUCCESS_TX_MAC_TX;
+        } else if (strncmp(buf,"mac_rx ",7)==0) {
+            sscanf(buf,"mac_rx %d %s\r\n",&PortNo,payload);
+            hex2int(payload, strlen(payload), MyLoraNode);
+            ret = SUCCESS_TX_MAC_RX;
+        } else if (strncmp(buf,"mac_err",7)==0) {
+            LastAnswer=TRUE;
+            ret = ERROR_TX_MAC_ERR;
         } else if (strncmp(buf,"invalid_data_len",16)==0) {
-            return ERROR_TX_INVALID_DATA_LEN;
-        } else if (strncmp(buf,"mac_rx",6)==0) {
-            // Get Rx Data --> GetRxData(buf+7, sz-7, MyLoraNode)
-            sz = GetLine_UART(uart, buf);
-            if (strncmp(buf,"mac_rx",6)==0) {
-                // Get Rx Data --> GetRxData(buf+7, sz-7, MyLoraNode)
-                sz = GetLine_UART(uart, buf);
-                if (strncmp(buf,"mac_tx_ok",9)==0) {
-                    return SUCCESS_TX_MAC_TX;
-                } else {
-                    return ERROR_TX_UNKNOWN;
-                }
-            } else {
-                return ERROR_TX_UNKNOWN;
-            }
+            LastAnswer=TRUE;
+            ret = ERROR_TX_INVALID_DATA_LEN;
+        } else if (strncmp(buf,"invalid_param",13)==0) {
+            LastAnswer=TRUE;
+            ret = ERROR_TX_INVALID_PARAM;
+        } else if (strncmp(buf,"not_joined",10)==0) {
+            LastAnswer=TRUE;
+            ret = ERROR_TX_NOT_JOINED;
+        } else if (strncmp(buf,"no_free_ch",10)==0) {
+            LastAnswer=TRUE;
+            ret = ERROR_TX_NO_FREE_CH;
+        } else if (strncmp(buf,"silent",6)==0) {
+            LastAnswer=TRUE;
+            ret = ERROR_TX_SILENT;
+        } else if (strncmp(buf,"frame_counter_err_rejoin_needed",31)==0) {
+            LastAnswer=TRUE;
+            ret = ERROR_TX_REJOIN_NEEDED;
+        } else if (strncmp(buf,"busy",4)==0) {
+            LastAnswer=TRUE;
+            ret = ERROR_TX_BUSY;
+        } else if (strncmp(buf,"mac_paused",10)==0) {
+            LastAnswer=TRUE;
+            ret = ERROR_TX_MAC_PAUSED;
+        } else if (strncmp(buf,"invalid_data_len",16)==0) {
+            LastAnswer=TRUE;
+            ret = ERROR_TX_INVALID_DATA_LEN;
         } else {
-            return ERROR_TX_UNKNOWN;
+            LastAnswer=TRUE;
+            ret = ERROR_TX_UNKNOWN;
         }
-    } else if (strncmp(buf,"invalid_param",13)==0) {
-        return ERROR_TX_INVALID_PARAM;
-    } else if (strncmp(buf,"not_joined",10)==0) {
-        return ERROR_TX_NOT_JOINED;
-    } else if (strncmp(buf,"no_free_ch",10)==0) {
-        return ERROR_TX_NO_FREE_CH;
-    } else if (strncmp(buf,"silent",6)==0) {
-        return ERROR_TX_SILENT;
-    } else if (strncmp(buf,"frame_counter_err_rejoin_needed",31)==0) {
-        return ERROR_TX_REJOIN_NEEDED;
-    } else if (strncmp(buf,"busy",4)==0) {
-        return ERROR_TX_BUSY;
-    } else if (strncmp(buf,"mac_paused",10)==0) {
-        return ERROR_TX_MAC_PAUSED;
-    } else if (strncmp(buf,"invalid_data_len",16)==0) {
-        return ERROR_TX_INVALID_DATA_LEN;
-    } else {
-        return ERROR_TX_UNKNOWN;
     }
-
+    return ret;
 }
 
 /*!
@@ -699,6 +731,53 @@ uint8_t Uint8Array2Char(uint8_t *DataPacket, uint8_t DataPacketLen, unsigned cha
 
     return k+1;
 
+}
+
+uint8_t hex2int(unsigned char *hex, uint8_t len, struct LoraNode *MyLoraNode) {
+
+    uint32_t val = 0;
+
+    int i;
+    for (i=0;i<len;i++) {
+        // get current character then increment
+        uint8_t byte = hex[i];
+        // transform hex character to the 4bit equivalent number, using the ascii table indexes
+        if (byte >= '0' && byte <= '9') byte = byte - '0';
+        else if (byte >= 'a' && byte <='f') byte = byte - 'a' + 10;
+        else if (byte >= 'A' && byte <='F') byte = byte - 'A' + 10;
+        // shift 4 to make space for new digit, and add the 4 bits of the new digit
+        val = (val << 4) | (byte & 0xF);
+        if (i==3) {
+            MyNode.WakeUpInterval = (uint16_t)val;
+            val = 0;
+        } else if (i==5) {
+            MyNode.Mode = (uint8_t)val;
+            if ((val & 0x80) != 0) {
+                MyNode.FirstBoot = 1;
+            } else {
+                MyNode.FirstBoot = 0;
+            }
+            val = 0;
+        } else if (i==13) {
+            MyNode.SSID[5] = (char)((val & 0xff000000) >> 24);
+            MyNode.SSID[4] = (char)((val & 0x00ff0000) >> 16);
+            MyNode.SSID[3] = (char)((val & 0x0000ff00) >> 8);
+            MyNode.SSID[2] = (char)(val & 0x000000ff);
+            val = 0;
+        } else if (i==17) {
+            MyNode.SSID[1] = (char)((val & 0x0000ff00) >> 8);
+            MyNode.SSID[0] = (char)(val & 0x000000ff);
+            val = 0;
+        } else if (i==19) {
+            MyNode.NCycles = (uint8_t)val;
+            val = 0;
+        } else if (i==25) {
+            MyLoraNode->Upctr = val;
+            val = 0;
+        }
+    }
+
+    return 0;
 }
 
 

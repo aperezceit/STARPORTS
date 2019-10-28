@@ -220,6 +220,11 @@ GPIO_PinConfig gpioPinConfigs[] = {
     GPIOCC32XX_GPIO_00 | GPIO_DO_NOT_CONFIG, /* EN_BME280 */
     GPIOCC32XX_GPIO_28 | GPIO_DO_NOT_CONFIG, /* EN_LDC1000 */
     GPIOCC32XX_GPIO_07 | GPIO_DO_NOT_CONFIG, /* DS1374_INTB */
+    GPIOCC32XX_GPIO_10 | GPIO_DO_NOT_CONFIG, /* SCL */
+    GPIOCC32XX_GPIO_11 | GPIO_DO_NOT_CONFIG, /* SDA */
+    GPIOCC32XX_GPIO_14 | GPIO_DO_NOT_CONFIG, /* SCLK */
+    GPIOCC32XX_GPIO_16 | GPIO_DO_NOT_CONFIG, /* MOSI */
+    GPIOCC32XX_GPIO_17 | GPIO_DO_NOT_CONFIG, /* CS */
 
 };
 
@@ -289,37 +294,37 @@ const uint_least8_t I2C_count = CC3220SF_STARPORTS_I2CCOUNT;
 PowerCC32XX_ParkInfo parkInfo[] = {
 /*          PIN                    PARK STATE              PIN ALIAS (FUNCTION)
      -----------------  ------------------------------     -------------------- */
-    {PowerCC32XX_PIN01, PowerCC32XX_WEAK_PULL_UP_STD},   /* I2C_SCL             */
-    {PowerCC32XX_PIN02, PowerCC32XX_WEAK_PULL_UP_STD},   /* I2C_SDA             */
-    {PowerCC32XX_PIN03, PowerCC32XX_WEAK_PULL_DOWN_STD}, /* SPI_CS_ADXL355      */
-    {PowerCC32XX_PIN04, PowerCC32XX_WEAK_PULL_DOWN_STD}, /* SPI_CS_BME280       */
-    {PowerCC32XX_PIN05, PowerCC32XX_WEAK_PULL_DOWN_STD}, /* SPI_SCLK            */
-    {PowerCC32XX_PIN06, PowerCC32XX_WEAK_PULL_DOWN_STD}, /* SPI_MISO            */
-    {PowerCC32XX_PIN07, PowerCC32XX_WEAK_PULL_DOWN_STD}, /* SPI_MOSI            */
-    {PowerCC32XX_PIN08, PowerCC32XX_WEAK_PULL_UP_STD},   /* SPI_CS              */
+    {PowerCC32XX_PIN01, PowerCC32XX_DRIVE_LOW},   /* I2C_SCL             */
+    {PowerCC32XX_PIN02, PowerCC32XX_DRIVE_LOW},   /* I2C_SDA             */
+    {PowerCC32XX_PIN03, PowerCC32XX_DRIVE_LOW},   /* SPI_CS_ADXL355      */
+    {PowerCC32XX_PIN04, PowerCC32XX_DRIVE_LOW},   /* SPI_CS_BME280       */
+    {PowerCC32XX_PIN05, PowerCC32XX_DRIVE_LOW},   /* SPI_SCLK            */
+    {PowerCC32XX_PIN06, PowerCC32XX_DRIVE_LOW},   /* SPI_MISO            */
+    {PowerCC32XX_PIN07, PowerCC32XX_DRIVE_LOW},   /* SPI_MOSI            */
+    {PowerCC32XX_PIN08, PowerCC32XX_DRIVE_LOW},   /* SPI_CS              */
     {PowerCC32XX_PIN13, PowerCC32XX_WEAK_PULL_DOWN_STD}, /* FLASH_SPI_DIN       */
-    {PowerCC32XX_PIN15, PowerCC32XX_WEAK_PULL_DOWN_STD}, /* SPI_CS_LDC1000      */
+    {PowerCC32XX_PIN15, PowerCC32XX_DRIVE_LOW}, /* SPI_CS_LDC1000      */
     {PowerCC32XX_PIN16, PowerCC32XX_WEAK_PULL_DOWN_STD}, /* TDI (JTAG DEBUG)    */
     {PowerCC32XX_PIN17, PowerCC32XX_WEAK_PULL_DOWN_STD}, /* TDO (JTAG DEBUG)    */
     {PowerCC32XX_PIN19, PowerCC32XX_WEAK_PULL_DOWN_STD}, /* TCK (JTAG DEBUG)    */
     {PowerCC32XX_PIN20, PowerCC32XX_WEAK_PULL_DOWN_STD}, /* TMS (JTAG DEBUG)    */
-    {PowerCC32XX_PIN18, PowerCC32XX_WEAK_PULL_DOWN_STD}, /* EN_LDC1000          */
+    {PowerCC32XX_PIN18, PowerCC32XX_DRIVE_LOW}, /* EN_LDC1000          */
     {PowerCC32XX_PIN21, PowerCC32XX_WEAK_PULL_DOWN_STD}, /* SOP2                */
     {PowerCC32XX_PIN29, PowerCC32XX_WEAK_PULL_DOWN_STD}, /* ANTSEL1             */
     {PowerCC32XX_PIN30, PowerCC32XX_WEAK_PULL_DOWN_STD}, /* ANTSEL2             */
     {PowerCC32XX_PIN45, PowerCC32XX_WEAK_PULL_DOWN_STD}, /* DCDC_ANA2_SW_P      */
-    {PowerCC32XX_PIN50, PowerCC32XX_WEAK_PULL_DOWN_STD}, /* EN_BME280           */
+    {PowerCC32XX_PIN50, PowerCC32XX_DRIVE_LOW}, /* EN_BME280           */
     {PowerCC32XX_PIN52, PowerCC32XX_WEAK_PULL_DOWN_STD}, /* RTC_XTAL_N          */
-    {PowerCC32XX_PIN53, PowerCC32XX_WEAK_PULL_DOWN_STD}, /* RN2483_MCLR         */
-    {PowerCC32XX_PIN55, PowerCC32XX_WEAK_PULL_UP_STD},   /* XDS_UART_RX         */
-    {PowerCC32XX_PIN57, PowerCC32XX_WEAK_PULL_UP_STD},   /* XDS_UART_TX         */
-    {PowerCC32XX_PIN58, PowerCC32XX_WEAK_PULL_UP_STD},   /* UART_TX             */
-    {PowerCC32XX_PIN59, PowerCC32XX_WEAK_PULL_UP_STD},   /* UART_RX             */
+    {PowerCC32XX_PIN53, PowerCC32XX_DRIVE_LOW}, /* RN2483_MCLR         */
+    {PowerCC32XX_PIN55, PowerCC32XX_DRIVE_LOW},   /* XDS_UART_RX         */
+    {PowerCC32XX_PIN57, PowerCC32XX_DRIVE_LOW},   /* XDS_UART_TX         */
+    {PowerCC32XX_PIN58, PowerCC32XX_DRIVE_LOW},   /* UART_TX             */
+    {PowerCC32XX_PIN59, PowerCC32XX_DRIVE_LOW},   /* UART_RX             */
     {PowerCC32XX_PIN60, PowerCC32XX_WEAK_PULL_DOWN_STD}, /* ADCIN               */
-    {PowerCC32XX_PIN61, PowerCC32XX_WEAK_PULL_DOWN_STD}, /* EN_ADXL355          */
+    {PowerCC32XX_PIN61, PowerCC32XX_DRIVE_LOW}, /* EN_ADXL355          */
     {PowerCC32XX_PIN62, PowerCC32XX_WEAK_PULL_DOWN_STD}, /* INTB_RTC            */
-    {PowerCC32XX_PIN63, PowerCC32XX_WEAK_PULL_UP_STD},   /* EN_NODE             */
-    {PowerCC32XX_PIN64, PowerCC32XX_WEAK_PULL_DOWN_STD}, /* LDC1000_CLK         */
+    {PowerCC32XX_PIN63, PowerCC32XX_DRIVE_LOW},   /* EN_NODE             */
+    {PowerCC32XX_PIN64, PowerCC32XX_DRIVE_LOW}, /* LDC1000_CLK         */
 };
 
 /*

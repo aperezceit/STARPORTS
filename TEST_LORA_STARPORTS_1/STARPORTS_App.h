@@ -21,6 +21,11 @@
 #define MODE_STORAGE_LORA       0x01
 #define MODE_NORMAL_WIFI        0x02
 #define MODE_STORAGE_WIFI       0x03
+#define MODE_AP_WIFI            0x04
+
+
+#define SHUTDOWN    1
+#define CONTINUE    0
 
 #define RNW_LSB     0
 #define RNW_MSB     1

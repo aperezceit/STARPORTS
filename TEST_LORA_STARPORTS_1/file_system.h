@@ -41,7 +41,7 @@ int st_readFileNFails();
 int writeFirstBoot(uint8_t FirstBoot);
 int st_readFileFirstBoot();
 int st_readFileFirstBoot();
-int writeNCycles(uint16_t NCycles);
+int writeNCycles(uint8_t NCycles);
 int st_readFileNCycles();
 int writeUpCntr(uint32_t Upctr);
 int st_readFileUpCntr();
@@ -50,7 +50,7 @@ int st_readFileMode();
 int writeWakeUp(uint16_t WakeUpInterval);
 int st_readFileWakeUp();
 int writeSSID(unsigned char *SSID);
-int st_readFileSSID();
+int st_readFileSSID(unsigned char *ssid);
 int deleteFile();
 int newFile();
 

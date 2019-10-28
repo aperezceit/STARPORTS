@@ -18,7 +18,6 @@
 extern UART_Handle uart0;
 
 void Reset_RN2483(void) {
-
     // Activate /MCLR Pin
     GPIO_write(Board_RN2483_MCLR, 0);
     usleep(50000);

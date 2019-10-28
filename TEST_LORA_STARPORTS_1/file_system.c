@@ -343,11 +343,11 @@ int st_readFileFirstBoot()
     RetVal = sl_FsClose(fd, 0, 0, 0);
     if (RetVal < 0)
     {
-        UART_PRINT("Error closing the file : %s\n\r", FS_FIRST_BOOT);
+        // UART_PRINT("Error closing the file : %s\n\r", FS_FIRST_BOOT);
     }
     else
     {
-//        UART_PRINT("File closed for read: %s\n\r", FS_FIRST_BOOT);
+        // UART_PRINT("File closed for read: %s\n\r", FS_FIRST_BOOT);
     }
 
     return (atoi(&buffer));
@@ -356,7 +356,7 @@ int st_readFileFirstBoot()
 ///////////////////////////////////////
 /* Escribir y leer en archivo NCYCLES*/
 ///////////////////////////////////////
-int writeNCycles(uint16_t NCycles)
+int writeNCycles(uint8_t NCycles)
 {
 
     int RetVal = 0;
@@ -748,7 +748,7 @@ int writeSSID(unsigned char *SSID)
     {
 //        UART_PRINT("file opened: %s\n\r", FS_SSID);
 
-        RetVal = sl_FsWrite(fd, 0, &ssid, strlen(ssid));
+        RetVal = sl_FsWrite(fd, 0, ssid, strlen(ssid));
         if (RetVal <= 0)
         {
             UART_PRINT("Writing error:  %d\n\r" ,RetVal);
@@ -769,55 +769,40 @@ int writeSSID(unsigned char *SSID)
     return offset;
 }
 
-int st_readFileSSID()
+int st_readFileSSID(unsigned char *ssid)
 {
     int offset = 0;
     int RetVal = 0;
-    _u8 buffer[MAX_FILE_SIZE];
     int32_t fd;
-    _u32 length = 6;
 
-    memset(&buffer,0, sizeof(buffer));
+    // memset(&buffer,0, sizeof(buffer));
     fd = sl_FsOpen(FS_SSID, SL_FS_READ, 0);
-    if (fd < 0)
-    {
+    if (fd < 0) {
         UART_PRINT("\r\nError opening the file : %s\n\r", FS_SSID);
-    }
-    else
-    {
+    } else {
 //        UART_PRINT("\r\nfile opened for read: %s\n\r", FS_SSID);
     }
 
-    while(RetVal=sl_FsRead(fd, offset, &buffer[0], MAX_FILE_SIZE)>1)
-    {
-        if(strlen(buffer)!=0)
-            {
-        if(RetVal == SL_ERROR_FS_OFFSET_OUT_OF_RANGE)
-        {// EOF
-            break;
-        }
-        if(RetVal < 0)
-        {// Error
-            UART_PRINT("sl_FsRead error: %d\n\r", RetVal);
-            return RetVal;
-        }
-        offset += strlen(buffer);
-        }
+    RetVal = sl_FsRead(fd, 0, ssid, strlen(ssid));
 
+    if(RetVal == SL_ERROR_FS_OFFSET_OUT_OF_RANGE) {// EOF
+        return RetVal;
+    } else if (RetVal < 0)  {// Error
+        UART_PRINT("sl_FsRead error: %d\n\r", RetVal);
+        return RetVal;
     }
-    UART_PRINT("READING SSID: %d \n\r", buffer);
+
+    UART_PRINT("READING SSID: %s \n\r", ssid);
 
     RetVal = sl_FsClose(fd, 0, 0, 0);
-    if (RetVal < 0)
-    {
-        UART_PRINT("Error closing the file : %s\n\r", FS_SSID);
-    }
-    else
-    {
-//        UART_PRINT("File closed for read: %s\n\r", FS_SSID);
+    if (RetVal < 0) {
+        // UART_PRINT("Error closing the file : %s\n\r", FS_SSID);
+    } else {
+        // UART_PRINT("File closed for read: %s\n\r", FS_SSID);
     }
 
-    return (buffer);
+    return 0;
+
 }
 
 ////////////////////////////////

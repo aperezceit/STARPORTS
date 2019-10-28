@@ -160,6 +160,7 @@ uint8_t GetSensorData(uint8_t *DataPacket) {
     // Uses timer to take DataSensorLen[1] values
     // Init Timer to take several measures at exactly the same interval
     // Timer1Event = 0;
+    Timer_init();
     timer = Startup_Oneshot_Timer(Board_TIMER1, interval);
     // Init CC3220 Internal ADC
     adc = Startup_ADC(Board_ADC0);
