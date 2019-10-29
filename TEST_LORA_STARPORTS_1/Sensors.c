@@ -142,25 +142,24 @@ uint8_t GetSensorData(uint8_t *DataPacket) {
     // Init Data Packet to Send
     DataPacketLen = IniPacket(DataPacket, MyNode.NodeId);
 
-    if (i2c != NULL) {
-        cr = 240;   // 4 conversions per second
-        DevId = GetID_TMP006(i2c, Board_I2C_TMP006_ADDR);
-        if (DevId==TMP006_ID) {
-            SetMOD_TMP006(i2c, Board_I2C_TMP006_ADDR, cr);
-            usleep(10000);
-            // Get Temp Data and Add Data to Packet
-            s16DataSensor[0] = GetTA_TMP006(i2c,Board_I2C_TMP006_ADDR);
-            DataPacketLen = Add_s16Data2Packet(DataPacket, DataPacketLen, MyTMP006.SensorId, s16DataSensor, 1);
-        }
-        // Watchdog_clear(wd);
-//        UART_write(uart0, "2 ",2); // Debug Message
-    }
+    // TMP006 is not present in the PCB for FCC
+    //    if (i2c != NULL) {
+    //        cr = 240;   // 4 conversions per second
+    //        DevId = GetID_TMP006(i2c, Board_I2C_TMP006_ADDR);
+    //        if (DevId==TMP006_ID) {
+    //            SetMOD_TMP006(i2c, Board_I2C_TMP006_ADDR, cr);
+    //            usleep(10000);
+    //            // Get Temp Data and Add Data to Packet
+    //            s16DataSensor[0] = GetTA_TMP006(i2c,Board_I2C_TMP006_ADDR);
+    //            DataPacketLen = Add_s16Data2Packet(DataPacket, DataPacketLen, MyTMP006.SensorId, s16DataSensor, 1);
+    //            UART_write(uart0, "2 ",2); // Debug Message
+    //        }
+    //        // Watchdog_clear(wd);
+    //    }
 
     // Get ADC Data (Normally VBat Value)
     // Uses timer to take DataSensorLen[1] values
     // Init Timer to take several measures at exactly the same interval
-    // Timer1Event = 0;
-    Timer_init();
     timer = Startup_Oneshot_Timer(Board_TIMER1, interval);
     // Init CC3220 Internal ADC
     adc = Startup_ADC(Board_ADC0);
@@ -177,15 +176,17 @@ uint8_t GetSensorData(uint8_t *DataPacket) {
         ADC_close(adc);
         Timer_stop(timer);
         Timer_close(timer);
-//        UART_write(uart0, "3 ",2); // Debug Message
+        UART_write(uart0, "3 ",2); // Debug Message
         s16DataSensor[0] = (int16_t)(adcValMean/MyVbat.NSamples);
-        // Add ADC Data to Packer
+        // Add ADC Data to Packet
         DataPacketLen = Add_s16Data2Packet(DataPacket, DataPacketLen, MyVbat.SensorId, s16DataSensor, 1);
     }
 
+
     if (spi != NULL) {
-        // ADXL355_Enable();
-        // ADXL355_SPI_Enable();
+        ADXL355_Enable();
+        ADXL355_SPI_Enable();
+        usleep(100);
         DevId = ADXL355_DevId(spi);
         if (DevId==ADXL355_ID) {
             ADXL355_Reset(spi);
@@ -197,14 +198,16 @@ uint8_t GetSensorData(uint8_t *DataPacket) {
             ADXL355_Get_Accel_Frame(spi, MyADXL.NSamples, s32DataSensor);
             // Add ADXL355 Data to Packet
             DataPacketLen = Add_s32Data2Packet(DataPacket, DataPacketLen, MyADXL.SensorId, s32DataSensor, 6);
+            UART_write(uart0, "4 ",2); // Debug Message
         }
         // Watchdog_clear(wd);
-        // ADXL355_SPI_Disable();
-        // ADXL355_Disable();
-//        UART_write(uart0, "4 ",2); // Debug Message
+        ADXL355_SPI_Disable();
+        ADXL355_Disable();
 
-        // BME280_Enable();
-        // BME280_SPI_Enable();
+
+        BME280_Enable();
+        BME280_SPI_Enable();
+        usleep(100);
         DevId = (uint16_t)BME280_DevId(spi);
         if (DevId==BME280_ID) {
             BME280_Reset(spi);
@@ -223,19 +226,22 @@ uint8_t GetSensorData(uint8_t *DataPacket) {
 
             // Add BME280 Data to Packet
             DataPacketLen = Add_s32Data2Packet(DataPacket, DataPacketLen, MyBME.SensorId, s32DataSensor, 3);
+            UART_write(uart0, "5 ",2); // Debug Message
         }
         free(MyCalib);
         // Watchdog_clear(wd);
-        // BME280_SPI_Disable();
-        // BME280_Disable();
-//        UART_write(uart0, "5 ",2); // Debug Message
+        BME280_SPI_Disable();
+        BME280_Disable();
 
-        // LDC1000_Enable();
-        // LDC1000_SPI_Enable();
+
+        LDC1000_Enable();
+        LDC1000_SPI_Enable();
+        usleep(1000);
+        // pwm = Config_PWM(Board_PWM0);
+        // PWM_start(pwm); /* Generate CLK Signal of LDC1000 (if necessary) */
         DevId = (uint16_t)LDC1000_DevId(spi);
         if (DevId==LDC1000_ID) {
-            pwm = Config_PWM(Board_PWM0);
-            PWM_start(pwm); /* Generate CLK Signal of LDC1000 (if necessary) */
+            UART_write(uart0, "6 ",2); // Debug Message
             LDC1000_Write_Pow_Conf(spi, STBY_MODE);
             LDC1000_Write_Rp_Max(spi, RPMAX0981);
             LDC1000_Write_Rp_Min(spi, RPMIN0436);
@@ -245,16 +251,15 @@ uint8_t GetSensorData(uint8_t *DataPacket) {
             LDC1000_Write_Clk_Conf(spi, XIN | CLK_ON);
             LDC1000_Write_Pow_Conf(spi, ACTIVE_MODE);
             LDC1000_Get_Proximity_Frame(spi, MyLDC.NSamples, s32DataSensor);
-            PWM_stop(pwm);
-            PWM_close(pwm);
 
             // Add LDC1000 Data to Packet
             DataPacketLen = Add_s32Data2Packet(DataPacket, DataPacketLen, MyLDC.SensorId, s32DataSensor, 2);
         }
+        // PWM_stop(pwm);
+        // PWM_close(pwm);
         // Watchdog_clear(wd);
-        // LDC1000_SPI_Disable();
-        // LDC1000_Disable();
-//        UART_write(uart0, "6 ",2); // Debug Message
+        LDC1000_SPI_Disable();
+        LDC1000_Disable();
     }
 
     return DataPacketLen;

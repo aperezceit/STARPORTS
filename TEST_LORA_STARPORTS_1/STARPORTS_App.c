@@ -127,6 +127,7 @@ void *mainThread(void *arg0)
     int16_t         sockId;
     int16_t         status = -1;
 
+
     // Quicky enable de node (the jumper an be removed)
     GPIO_setConfig(Board_EN_NODE, GPIO_CFG_OUT_STD | GPIO_CFG_OUT_HIGH);
     Node_Enable();
@@ -146,50 +147,19 @@ void *mainThread(void *arg0)
 
     // st_listFiles(0);
 
-//    if(firstTime==0)
-//    {
-//        newFileWake();
-//        MyNode.WakeUpInterval=1200;
-//        writeWakeUp(MyNode.WakeUpInterval);
-//
-//        newFileMode();
-//        MyNode.Mode=0;
-//        writeMode(MyNode.Mode);
-//
-//        newFileNCycles();
-//        MyNode.NCycles=1;
-//        writeNCycles(MyNode.NCycles);
-//
-//        newFileSSID();
-//
-//        newFileFirstBoot();
-//        MyNode.FirstBoot=1;
-//        writeFirstBoot(MyNode.FirstBoot);
-//
-//        newFileNFails();
-//        MyNode.NFails=0;
-//        writeNFails( MyNode.NFails);
-//
-//        newFileUpcntr();
-//        MyLoraNode.Upctr=0;
-//        writeUpCntr(MyLoraNode.Upctr);
-//
-//        firstTime=0;
-//    }
-
     /* Get Param Values from internal filesystem */
     // Get MyNode.WakeUpInterval --> Read WakeUp_Time File
-    MyNode.WakeUpInterval = st_readFileWakeUp();
+    MyNode.WakeUpInterval = 30; // st_readFileWakeUp();
     // Get MyNode.Mode --> Read File Mode
-    MyNode.Mode = st_readFileMode();
+    MyNode.Mode = 0; // st_readFileMode();
     // Get MyNode.NCycles --> Read File Ncycles
-    MyNode.NCycles = st_readFileNCycles();
+    MyNode.NCycles = 1; // st_readFileNCycles();
     // Get MyNode.SSID[] --> Read SSID File
-    st_readFileSSID(&(MyNode.SSID));  //REVISAR, LA LECTURA NO ES CORRECTA
+    st_readFileSSID(&(MyNode.SSID));
     // Get MyNode.FirstBoot --> Read FirstBoot File: Yes (1) No (0)
-    MyNode.FirstBoot = st_readFileFirstBoot();
+    MyNode.FirstBoot = 0; // st_readFileFirstBoot();
     // Get MyNode.NFails --> Number of failed attempts to Wireless Connection
-    MyNode.NFails=st_readFileNFails();
+    MyNode.NFails = 0; // st_readFileNFails();
     /************ Ends Reading Configuration Files **************************/
 
     if (MyNode.NFails>=4) {
@@ -267,9 +237,10 @@ void *mainThread(void *arg0)
                 MyNode.NFails=0; // and write to file NFails
                 // Continue reading sensors
             } else {
-                MyNode.NFails++;   // Write NFails File
-                writeNFails(MyNode.NFails);
-                NextStep=SHUTDOWN;
+                // Comentado para poder usar los sensores
+                // MyNode.NFails++;   // Write NFails File
+                // writeNFails(MyNode.NFails);
+                // NextStep=SHUTDOWN;
             }
         }
     } else if (MyNode.Mode==MODE_NORMAL_WIFI) {
@@ -315,7 +286,10 @@ void *mainThread(void *arg0)
     /* Configure SPI Master at 5 Mbps, 8-bits, CPOL=0, PHA=0 */
     SPI_CS_Disable();   // Put CS to Logic High
     spi = Startup_SPI(Board_SPI_MASTER, 8, 5000000);
+    /* Start Timer for ADC Timestep */
+    Timer_init();
     DataPacketLen = GetSensorData(DataPacket);
+    /************** End Reading Data from Sensors ***********************************/
 
     /* Close all sensor related peripherals */
     SPI_close(spi);
@@ -330,6 +304,9 @@ void *mainThread(void *arg0)
     I2C_As_GPIO_Low();  // Puts SCL and SDA signals low to save power
 
     MyLoraNode.DataLenTx = Uint8Array2Char(DataPacket, DataPacketLen, MyLoraNode.DataTx);
+
+    UART_write(uart0, MyLoraNode.DataTx,MyLoraNode.DataLenTx);
+    UART_write(uart0, "\r\n", 2);
 
     if (MyNode.Mode==MODE_NORMAL_LORA) {
         ret = Tx_Uncnf_Lora(uart1, &MyLoraNode);    // Transmit Data, several tries?
@@ -346,11 +323,11 @@ void *mainThread(void *arg0)
             MyNode.NFails=0; // and write to file NFails
             writeNFails(MyNode.NFails);
         } else {
-            MyNode.NFails++;
-            writeNFails(MyNode.NFails);
+            // MyNode.NFails++;
+            // writeNFails(MyNode.NFails);
         }
-
     }
+
 /***    else if (MyNode.Mode==MODE_NORMAL_WIFI) {
         // Transmit Data through WiFi, several tries?
         if (ret==SUCCESS_WIFI_TX) {
