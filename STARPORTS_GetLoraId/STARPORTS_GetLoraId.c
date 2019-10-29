@@ -123,7 +123,7 @@ void *mainThread(void *arg0)
     struct LoraNode MyLoraNode;
 
     unsigned char Command[128];
-    unsigned char buf[64];
+    unsigned char buf[128];
     uint8_t ret;
     uint8_t sz;
     uint8_t NTxFail;
@@ -196,6 +196,7 @@ void *mainThread(void *arg0)
     // strcpy(MyLoraNode.AppsKey, "D4B977D54A7ECC562CD18031178D1D43");
     // strcpy(MyLoraNode.NwksKey, "D7AB91C4AE6F5A09C17540145556AD74");
 
+    memset(&buf,0, sizeof(buf));
     strcpy(Command,"sys get hweui\r\n");
     UART_write(uart1, (const char *)(Command), 15);
     sz = GetLine_UART(uart1, buf);
@@ -206,10 +207,12 @@ void *mainThread(void *arg0)
     UART_write(uart0,"\r\n",2);
 
 
+    memset(&buf,0, sizeof(buf));
     strcpy(Command,"mac set deveui ");
     strncat(Command, &MyLoraNode.DevEui,16);
     strcat(Command, "\r\n");
-    UART_write(uart1, (const char *)Command, 33);
+    UART_write(uart1, (const char *)Command, strlen(Command));
+    UART_PRINT(Command);
     sz = GetLine_UART(uart1, buf);
     if (strncmp(buf,"ok",2)==0) {
         UART_write(uart0,"mac set deveui successful\r\n",27);
@@ -217,6 +220,7 @@ void *mainThread(void *arg0)
 
 
     /* Enter AppEui */
+    memset(&buf,0, sizeof(buf));
     UART_write(uart0,"Enter AppEui: ",14);
     sz = GetLine_UART(uart0, buf);
     strncpy(MyLoraNode.AppEui, buf,16);
@@ -225,10 +229,12 @@ void *mainThread(void *arg0)
     UART_write(uart0, &MyLoraNode.AppEui, 16);
     UART_write(uart0,"\r\n",2);
 
+    memset(&buf,0, sizeof(buf));
     strcpy(Command,"mac set appeui ");
     strncat(Command, &MyLoraNode.AppEui,16);
     strcat(Command, "\r\n");
-    UART_write(uart1, (const char *)Command, 33);
+    UART_write(uart1, (const char *)Command, strlen(Command));
+    UART_PRINT(Command);
     sz = GetLine_UART(uart1, buf);
     if (strncmp(buf,"ok",2)==0) {
         UART_write(uart0,"mac set appeui successful\r\n",27);
@@ -236,6 +242,7 @@ void *mainThread(void *arg0)
 
 
     /* Enter AppKey */
+    memset(&buf,0, sizeof(buf));
     UART_write(uart0,"Enter AppKey: ",14);
     sz = GetLine_UART(uart0, buf);
     strncpy(MyLoraNode.AppKey, buf,32);
@@ -244,10 +251,12 @@ void *mainThread(void *arg0)
     UART_write(uart0, &MyLoraNode.AppKey, 32);
     UART_write(uart0,"\r\n",2);
 
+    memset(&buf,0, sizeof(buf));
     strcpy(Command,"mac set appkey ");
-    strncat(Command, &MyLoraNode.AppKey,16);
+    strncat(Command, &MyLoraNode.AppKey,32);
     strcat(Command, "\r\n");
-    UART_write(uart1, (const char *)Command, 33);
+    UART_write(uart1, (const char *)Command, strlen(Command));
+    UART_PRINT(Command);
     sz = GetLine_UART(uart1, buf);
     if (strncmp(buf,"ok",2)==0) {
         UART_write(uart0,"mac set appkey successful\r\n",27);
@@ -258,6 +267,22 @@ void *mainThread(void *arg0)
     if (ret==0) {
         UART_write(uart0,"mac save successful\r\n",21);
     }
+
+    memset(&buf,0, sizeof(buf));
+    strcpy(Command,"mac get deveui\r\n");
+    UART_write(uart1, (const char *)(Command), strlen(Command));
+    UART_PRINT(Command);
+    sz = GetLine_UART(uart1, buf);
+    UART_PRINT(buf);
+    UART_PRINT("\r\n");
+
+    memset(&buf,0, sizeof(buf));
+    strcpy(Command,"mac get appeui\r\n");
+    UART_write(uart1, (const char *)(Command), strlen(Command));
+    UART_PRINT(Command);
+    sz = GetLine_UART(uart1, buf);
+    UART_PRINT(buf);
+    UART_PRINT("\r\n");
 
 }
 

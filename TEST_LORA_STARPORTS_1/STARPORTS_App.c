@@ -145,7 +145,7 @@ void *mainThread(void *arg0)
 
     uart0 = Startup_UART(Board_UART0, 115200); // arrancado antes de leer para debug
 
-    // st_listFiles(0);
+    st_listFiles(0);
 
     /* Get Param Values from internal filesystem */
     // Get MyNode.WakeUpInterval --> Read WakeUp_Time File
@@ -157,16 +157,18 @@ void *mainThread(void *arg0)
     // Get MyNode.SSID[] --> Read SSID File
     st_readFileSSID(&(MyNode.SSID));
     // Get MyNode.FirstBoot --> Read FirstBoot File: Yes (1) No (0)
-    MyNode.FirstBoot = 0; // st_readFileFirstBoot();
+    MyNode.FirstBoot = 1; // st_readFileFirstBoot();
     // Get MyNode.NFails --> Number of failed attempts to Wireless Connection
     MyNode.NFails = 0; // st_readFileNFails();
     /************ Ends Reading Configuration Files **************************/
 
     if (MyNode.NFails>=4) {
-        UART_PRINT("ENTRO EN IF\n\r");
-        // Setup Node as WiFi and connect to Known Host
-        // ...
-        // ...
+        UART_PRINT("NFails > 4, SETTING NODE IN WIFI MODE\n\r");
+        usleep(2000);
+        wlanConf();    // Setup Node as WiFi and connect to Known Host
+        wlanConnect();
+        usleep(2000);
+
         MyNode.FirstBoot=TRUE; // and write to file FirstBoot
         writeFirstBoot(MyNode.FirstBoot);
         MyNode.NFails=0; // and write to file NFails
@@ -187,6 +189,74 @@ void *mainThread(void *arg0)
 
     UART_write(uart0, "\r\nInitiating Test of STARPORTS...\r\n", 35);
 
+    //**************************************************************//
+/*
+    unsigned char Command[128];
+    unsigned char buf2[64];
+
+    strcpy(Command,"sys get hweui\r\n");
+    UART_write(uart1, (const char *)(Command), 15);
+    sz = GetLine_UART(uart1, buf2);
+    strncpy(&MyLoraNode.DevEui,buf2,16);
+
+    UART_write(uart0,"DevId: ",7);
+    UART_write(uart0,&MyLoraNode.DevEui,16);
+    UART_write(uart0,"\r\n",2);
+
+
+    strcpy(Command,"mac set deveui ");
+    strncat(Command, &MyLoraNode.DevEui,16);
+    strcat(Command, "\r\n");
+    UART_write(uart1, (const char *)Command, 33);
+    sz = GetLine_UART(uart1, buf2);
+    if (strncmp(buf2,"ok",2)==0) {
+        UART_write(uart0,"mac set deveui successful\r\n",27);
+    }
+
+*/
+    /* Enter AppEui */
+/*    UART_write(uart0,"Enter AppEui: ",14);
+    sz = GetLine_UART(uart0, buf2);
+    strncpy(MyLoraNode.AppEui, buf2,16);
+
+    UART_write(uart0, "AppEui entered is ", 18);
+    UART_write(uart0, &MyLoraNode.AppEui, 16);
+    UART_write(uart0,"\r\n",2);
+
+    strcpy(Command,"mac set appeui ");
+    strncat(Command, &MyLoraNode.AppEui,16);
+    strcat(Command, "\r\n");
+    UART_write(uart1, (const char *)Command, 33);
+    sz = GetLine_UART(uart1, buf2);
+    if (strncmp(buf2,"ok",2)==0) {
+        UART_write(uart0,"mac set appeui successful\r\n",27);
+    }
+*/
+
+    /* Enter AppKey */
+/*    UART_write(uart0,"Enter AppKey: ",14);
+    sz = GetLine_UART(uart0, buf2);
+    strncpy(MyLoraNode.AppKey, buf2,32);
+
+    UART_write(uart0, "AppKey entered is ", 18);
+    UART_write(uart0, &MyLoraNode.AppKey, 32);
+    UART_write(uart0,"\r\n",2);
+
+    strcpy(Command,"mac set appkey ");
+    strncat(Command, &MyLoraNode.AppKey,16);
+    strcat(Command, "\r\n");
+    UART_write(uart1, (const char *)Command, 33);
+    sz = GetLine_UART(uart1, buf2);
+    if (strncmp(buf,"ok",2)==0) {
+        UART_write(uart0,"mac set appkey successful\r\n",27);
+    }
+*/
+    /* Save the results to RN2384 EEPROM */
+/*    ret = Mac_Save(uart1);
+    if (ret==0) {
+        UART_write(uart0,"mac save successful\r\n",21);
+    }
+*/    //*************************************************************//
 
     /*************** Begin Setting Node Configuration Parameters */
     // Set the WakeUp_Time in RTC

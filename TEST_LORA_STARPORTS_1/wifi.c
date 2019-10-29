@@ -168,6 +168,15 @@ int32_t wlanConf(void){
     return(0);
 }
 
+//*****************************************************************************
+//
+//! \brief    This function connects to a WIFI AP.
+//!
+//!
+//!
+//!
+//
+//*****************************************************************************
 int32_t wlanConnect(void)
 {
     SlWlanSecParams_t secParams = {0};
