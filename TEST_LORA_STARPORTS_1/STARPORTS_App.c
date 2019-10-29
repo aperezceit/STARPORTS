@@ -207,6 +207,7 @@ void *mainThread(void *arg0)
             // Join OTAA
             ret = Join_Otaa_Lora(uart1);
             if (ret==SUCCESS_OTAA_LORA) {
+                UART_write(uart0, Mess, strlen(Mess));
                 // Get devaddr from RN2483 & Write to file
                 ret = Mac_Get_Devaddr(uart1, &MyLoraNode);
                 ret = Mac_Set_Devaddr(uart1, &MyLoraNode);
@@ -219,11 +220,11 @@ void *mainThread(void *arg0)
                 MyNode.NFails=0; // and write to file NFails
                 writeNFails(MyNode.NFails);
             } else {
-                strcpy(Mess,"Join_Otaa_Lora() Failed ");
-                UART_write(uart1, Mess, 24);
+                strcpy(Mess,"Join_Otaa_Lora() Failed\r\n");
+                UART_write(uart0, Mess, strlen(Mess));  //cambiado a uart0
                 Mess[0] = '('; Mess[1] = ret+48; Mess[2]=')';
-                UART_write(uart1, Mess,3);
-                UART_write(uart1, "\r\n",2);
+                UART_write(uart0, Mess,3);  //cambiado a uart0
+                UART_write(uart0, "\r\n",2);    //cambiado a uart0
                 MyNode.NFails++; // Write NFails File
                 writeNFails(MyNode.NFails);
                 NextStep=SHUTDOWN;

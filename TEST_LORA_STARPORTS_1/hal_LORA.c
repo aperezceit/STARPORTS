@@ -223,6 +223,7 @@ uint8_t Join_Otaa_Lora(UART_Handle uart) {
     UART_write(uart, (const char *)Command, 15);
     UART_PRINT(Command);
     sz = GetLine_UART(uart, buf);
+    UART_PRINT(buf);
     if (strncmp(buf,"ok",2)==0) {
         sz = GetLine_UART(uart, buf);
         if (strncmp(buf,"denied",6)==0) {
