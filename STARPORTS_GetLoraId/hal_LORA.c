@@ -170,8 +170,10 @@ uint8_t Join_Otaa_Lora(UART_Handle uart) {
     unsigned char buf[64];
     uint8_t sz;
 
+    memset(&buf,0, sizeof(buf));
     strcpy(Command,"mac join otaa\r\n");
     UART_write(uart, (const char *)Command, 15);
+    UART_PRINT(Command);
     sz = GetLine_UART(uart, buf);
     UART_PRINT(buf);
     if (strncmp(buf,"ok",2)==0) {
@@ -264,7 +266,9 @@ uint8_t Mac_Get_Devaddr(UART_Handle uart, struct LoraNode *MyLoraNode) {
 
     strcpy(Command,"mac get devaddr\r\n");
     UART_write(uart, (const char *)(Command), 17);
+    UART_PRINT(Command);
     sz = GetLine_UART(uart, buf);
+    UART_PRINT(buf);
     strncpy(MyLoraNode->DevAddr,buf,8);
 
     return 0;
