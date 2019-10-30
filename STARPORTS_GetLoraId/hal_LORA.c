@@ -173,8 +173,10 @@ uint8_t Join_Otaa_Lora(UART_Handle uart) {
     strcpy(Command,"mac join otaa\r\n");
     UART_write(uart, (const char *)Command, 15);
     sz = GetLine_UART(uart, buf);
+    UART_PRINT(buf);
     if (strncmp(buf,"ok",2)==0) {
         sz = GetLine_UART(uart, buf);
+        UART_PRINT(buf);
         if (strncmp(buf,"denied",6)==0) {
             return ERROR_OTAA_DENIED;
         } else if (strncmp(buf,"accepted",8)==0) {

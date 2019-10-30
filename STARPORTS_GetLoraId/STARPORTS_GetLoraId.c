@@ -174,6 +174,7 @@ void *mainThread(void *arg0)
     RN2483_Set();
     // Recoge texto de inicialización del RN2483
     sz = GetLine_UART(uart1, buf);
+    UART_PRINT(buf);
     if (sz==0) {
         // Buffer size is too large
     }
@@ -196,9 +197,29 @@ void *mainThread(void *arg0)
     // strcpy(MyLoraNode.AppsKey, "D4B977D54A7ECC562CD18031178D1D43");
     // strcpy(MyLoraNode.NwksKey, "D7AB91C4AE6F5A09C17540145556AD74");
 
+    strcpy(Command,"sys factoryRESET\r\n");
+    UART_write(uart1, (const char *)(Command), strlen(Command));
+    UART_PRINT(Command);
+    sz = GetLine_UART(uart1, buf);
+    UART_PRINT(buf);
+
+
+    strcpy(Command,"sys get ver\r\n");
+    UART_write(uart1, (const char *)(Command), strlen(Command));
+    UART_PRINT(Command);
+    sz = GetLine_UART(uart1, buf);
+    UART_PRINT(buf);
+
+    strcpy(Command,"radio get freq\r\n");
+    UART_write(uart1, (const char *)(Command), strlen(Command));
+    UART_PRINT(Command);
+    sz = GetLine_UART(uart1, buf);
+    UART_PRINT(buf);
+
+
     memset(&buf,0, sizeof(buf));
     strcpy(Command,"sys get hweui\r\n");
-    UART_write(uart1, (const char *)(Command), 15);
+    UART_write(uart1, (const char *)(Command), strlen(Command));
     sz = GetLine_UART(uart1, buf);
     strncpy(&MyLoraNode.DevEui,buf,16);
 
@@ -262,6 +283,12 @@ void *mainThread(void *arg0)
         UART_write(uart0,"mac set appkey successful\r\n",27);
     }
 
+    strcpy(Command,"radio set sf sf7\r\n");
+    UART_write(uart1, (const char *)(Command), strlen(Command));
+    UART_PRINT(Command);
+    sz = GetLine_UART(uart1, buf);
+    UART_PRINT(buf);
+
     /* Save the results to RN2384 EEPROM */
     ret = Mac_Save(uart1);
     if (ret==0) {
@@ -283,6 +310,33 @@ void *mainThread(void *arg0)
     sz = GetLine_UART(uart1, buf);
     UART_PRINT(buf);
     UART_PRINT("\r\n");
+
+    memset(&buf,0, sizeof(buf));
+    strcpy(Command,"mac get status\r\n");
+    UART_write(uart1, (const char *)(Command), strlen(Command));
+    UART_PRINT(Command);
+    sz = GetLine_UART(uart1, buf);
+    UART_PRINT(buf);
+/*
+    memset(&buf,0, sizeof(buf));
+    strcpy(Command,"mac get ch\r\n");
+    UART_write(uart1, (const char *)(Command), strlen(Command));
+    UART_PRINT(Command);
+    sz = GetLine_UART(uart1, buf);
+    UART_PRINT(buf);
+*/
+    ret = Join_Otaa_Lora(uart1);
+    if (ret==SUCCESS_OTAA_LORA) {
+        strcpy(Mess,"Join_Otaa_Lora() Success\r\n");
+        UART_write(uart0, Mess, strlen(Mess));
+
+    } else {
+        strcpy(Mess,"Join_Otaa_Lora() Failed\r\n");
+        UART_write(uart0, Mess, strlen(Mess));  //cambiado a uart0
+        Mess[0] = '('; Mess[1] = ret+48; Mess[2]=')';
+        UART_write(uart0, Mess,3);  //cambiado a uart0
+        UART_write(uart0, "\r\n",2);    //cambiado a uart0
+    }
 
 }
 
