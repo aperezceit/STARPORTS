@@ -64,7 +64,7 @@ struct Node {
     uint16_t WakeUpInterval;
     uint8_t Mode;
     uint16_t NCycles;
-    unsigned char SSID[6];
+    unsigned char SSID[13];
     uint16_t NFails;
     uint8_t FirstBoot;
     uint8_t NSensors;

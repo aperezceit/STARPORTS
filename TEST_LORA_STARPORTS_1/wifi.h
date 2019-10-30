@@ -11,8 +11,10 @@
 
 #define PORT                        (9000)
 #define DEST_IP_ADDR                SL_IPV4_VAL(192,168,4,100)
-#define NUM_OF_PKT                  (1)
+#define NUM_OF_PKT                  (10)
 #define FRAME_LENGTH                (1000)
+
+#define PORT_UDP                    (9999)
 
 #define SERIALWIFI_PORT             (9000)
 /////////////////////////////////////
@@ -23,6 +25,7 @@
 #define SSID_NAME           "Movistar_361D"                 /* AP SSID */
 #define SECURITY_TYPE       SL_WLAN_SEC_TYPE_WPA_WPA2       /* Security type (OPEN or WEP or WPA*/
 #define SECURITY_KEY        "95MFQQL7791"                   /* Password of the secured AP */
+#define SECURITY_KEY_FILE_CONNECT        "95MFQQL7791"                   /* Password of the secured AP */
 
 #define LOOP_FOREVER() \
     { \
@@ -72,6 +75,7 @@ typedef struct _PowerMeasure_ControlBlock_t_
 
 
 int32_t wlanConnect(void);
+int32_t wlanConnectFromFile(unsigned char *ssid);
 int32_t wlanConf(void);
 void SimpleLinkNetAppRequestMemFreeEventHandler (uint8_t *buffer);
 void SimpleLinkNetAppRequestEventHandler(SlNetAppRequest_t *pNetAppRequest, SlNetAppResponse_t *pNetAppResponse);

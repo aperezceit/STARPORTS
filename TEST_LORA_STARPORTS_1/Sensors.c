@@ -176,7 +176,7 @@ uint8_t GetSensorData(uint8_t *DataPacket) {
         ADC_close(adc);
         Timer_stop(timer);
         Timer_close(timer);
-        UART_write(uart0, "3 ",2); // Debug Message
+        UART_write(uart0, "3\r\n",3); // Debug Message
         s16DataSensor[0] = (int16_t)(adcValMean/MyVbat.NSamples);
         // Add ADC Data to Packet
         DataPacketLen = Add_s16Data2Packet(DataPacket, DataPacketLen, MyVbat.SensorId, s16DataSensor, 1);
@@ -226,7 +226,7 @@ uint8_t GetSensorData(uint8_t *DataPacket) {
 
             // Add BME280 Data to Packet
             DataPacketLen = Add_s32Data2Packet(DataPacket, DataPacketLen, MyBME.SensorId, s32DataSensor, 3);
-            UART_write(uart0, "5 ",2); // Debug Message
+            UART_write(uart0, "5\r\n ",3); // Debug Message
         }
         free(MyCalib);
         // Watchdog_clear(wd);

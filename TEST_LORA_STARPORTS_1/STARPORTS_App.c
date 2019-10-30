@@ -82,7 +82,7 @@ uint8_t Timer0Event = 0;
 uint8_t Timer1Event = 0;
 uint8_t LPDSOut = 0;
 
-struct Node MyNode = {NODEID,1200,MODE_NORMAL_LORA,16,"PORTSN"};
+struct Node MyNode = {NODEID,1200,MODE_NORMAL_LORA,16,"Movistar_361D"};
 struct TMP006_Data MyTMP006 = {TMP006_ID};
 struct ADXL355_Data MyADXL = {ADXL355_ID,500,256};
 struct BME280_Data MyBME = {BME280_ID};
@@ -151,10 +151,11 @@ void *mainThread(void *arg0)
     // Get MyNode.WakeUpInterval --> Read WakeUp_Time File
     MyNode.WakeUpInterval = 30; // st_readFileWakeUp();
     // Get MyNode.Mode --> Read File Mode
-    MyNode.Mode = 0; // st_readFileMode();
+    MyNode.Mode = 2; // st_readFileMode();
     // Get MyNode.NCycles --> Read File Ncycles
     MyNode.NCycles = 1; // st_readFileNCycles();
     // Get MyNode.SSID[] --> Read SSID File
+    //writeSSID(MyNode.SSID);
     st_readFileSSID(&(MyNode.SSID));
     // Get MyNode.FirstBoot --> Read FirstBoot File: Yes (1) No (0)
     MyNode.FirstBoot = 1; // st_readFileFirstBoot();
@@ -166,7 +167,7 @@ void *mainThread(void *arg0)
         UART_PRINT("NFails > 4, SETTING NODE IN WIFI MODE\n\r");
         usleep(2000);
         wlanConf();    // Setup Node as WiFi and connect to Known Host
-        wlanConnect();
+        wlanConnectFromFile(MyNode.SSID);
         usleep(2000);
 
         MyNode.FirstBoot=TRUE; // and write to file FirstBoot
@@ -237,7 +238,8 @@ void *mainThread(void *arg0)
             // Join ABP
             ret = Join_Abp_Lora(uart1);
             if (ret==SUCCESS_ABP_LORA) {
-                MyNode.NFails=0; // and write to file NFails
+                MyNode.NFails=0;
+                writeNFails(MyNode.NFails); // and write to file NFails
                 // Continue reading sensors
             } else {
                 // Comentado para poder usar los sensores
@@ -247,11 +249,15 @@ void *mainThread(void *arg0)
             }
         }
     } else if (MyNode.Mode==MODE_NORMAL_WIFI) {
+        UART_PRINT("MODE_NORMAL_WIFI\n\r");
         if (MyNode.FirstBoot==TRUE) {
-            // Read SSID from file
+            st_readFileSSID(&(MyNode.SSID));    // Read SSID from file
             // Read other params ...
-            // Setup WiFi
-            // Connect WiFi
+            usleep(2000);
+            ret = wlanConf();    // Setup WiFi
+            ret = wlanConnectFromFile(MyNode.SSID);  // Connect WiFi
+            usleep(2000);
+
             if (ret==SUCCESS_CONNECT_WIFI) {
                 MyNode.FirstBoot = FALSE;  // Write FirstBoot File
                 writeFirstBoot(MyNode.FirstBoot);
@@ -331,18 +337,21 @@ void *mainThread(void *arg0)
         }
     }
 
-/***    else if (MyNode.Mode==MODE_NORMAL_WIFI) {
+    else if (MyNode.Mode==MODE_NORMAL_WIFI) {
+        UART_PRINT("SENDING SENSOR DATA OVER MODE_NORMAL_WIFI\r\n");
         // Transmit Data through WiFi, several tries?
-        if (ret==SUCCESS_WIFI_TX) {
+        //sendUdpClient(PORT_UDP);                      ******AÑADIR STRUCTURAS DE CONTROL EN WIFI.h
+/*        if (ret==SUCCESS_WIFI_TX) {
             // Getting Configuration Data back from AppServer
             // Write New Configuration Data to Files
             MyNode.NFails=0; // and write to file NFails
         } else {
             MyNode.NFails++;
-            // Write NFails File
+            writeNFails(MyNode.NFails); // Write NFails File
         }
+        */
     }
-***/
+
     Node_Disable();
 
 }

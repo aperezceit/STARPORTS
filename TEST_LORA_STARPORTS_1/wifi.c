@@ -198,6 +198,48 @@ int32_t wlanConnect(void)
     return(0);
 }
 
+//*****************************************************************************
+//
+//! \brief    This function connects to a WIFI AP.
+//!
+//!
+//!
+//!
+//
+//*****************************************************************************
+int32_t wlanConnectFromFile(unsigned char *ssid)
+{
+    uint8_t ret;
+
+    SlWlanSecParams_t secParams = {0};
+
+    secParams.Key = (signed char*)SECURITY_KEY_FILE_CONNECT;
+    secParams.KeyLen = strlen(SECURITY_KEY_FILE_CONNECT);
+    secParams.Type = SECURITY_TYPE;
+
+    unsigned char FileSSID[13];
+
+    sprintf(&FileSSID,"%s",ssid );
+
+    /* WLAN CONNECT TO AP*/
+    ret = sl_WlanConnect((signed char*)FileSSID, strlen(FileSSID), 0, &secParams, 0);
+    UART_PRINT("Trying to connect to AP : %s\n\r", FileSSID);
+
+    sl_Task(NULL);
+
+    while((!IS_CONNECTED(PowerMeasure_CB.slStatus)) || (!IS_IP_ACQUIRED(PowerMeasure_CB.slStatus)))
+    {
+        sl_Task(NULL);
+    }
+
+    if (ret!=0){
+        return ERROR_CONNECT_WIFI;
+    }else{
+        return SUCCESS_CONNECT_WIFI;
+    }
+    return(0);
+}
+
 void prepareDataFrame(uint16_t port,uint32_t ipAddr)
 {
     uint16_t idx;
@@ -261,7 +303,12 @@ int16_t sendUdpClient(uint16_t port)
     int32_t         status = -1;
 
     sockId = sl_Socket(SL_AF_INET,SL_SOCK_DGRAM, 0);
-    ASSERT_ON_ERROR(sockId);
+
+    if(sockId > 0){
+        UART_PRINT("SOCKET UDP");
+    }else{
+        UART_PRINT("error UDP");
+    }
 
     while (idx < NUM_OF_PKT)
     {

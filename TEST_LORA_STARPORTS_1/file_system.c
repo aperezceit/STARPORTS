@@ -734,7 +734,7 @@ int writeSSID(unsigned char *SSID)
     int RetVal = 0;
     _i32 offset = 0;
     _i32 fd;
-    unsigned char ssid[6];
+    unsigned char ssid[13];
 
     sprintf(&ssid,"%s",SSID );
 

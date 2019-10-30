@@ -226,24 +226,33 @@ uint8_t Join_Otaa_Lora(UART_Handle uart) {
     UART_PRINT(buf);
     if (strncmp(buf,"ok",2)==0) {
         sz = GetLine_UART(uart, buf);
+        UART_PRINT(buf);
         if (strncmp(buf,"denied",6)==0) {
+            UART_PRINT(buf);
             return ERROR_OTAA_DENIED;
         } else if (strncmp(buf,"accepted",8)==0) {
+            UART_PRINT(buf);
             return SUCCESS_OTAA_LORA;
         } else {
             return ERROR_OTAA_UNKNOWN;
         }
     } else if (strncmp(buf,"invalid_param",13)==0) {
+        UART_PRINT(buf);
         return ERROR_OTAA_INVALID_PARAM;
     } else if (strncmp(buf,"keys_not_init",13)==0) {
+        UART_PRINT(buf);
         return ERROR_OTAA_KEYS_NOT_INIT;
     } else if (strncmp(buf,"no_free_ch",10)==0) {
+        UART_PRINT(buf);
         return ERROR_OTAA_NO_FREE_CH;
     } else if (strncmp(buf,"silent",6)==0) {
+        UART_PRINT(buf);
         return ERROR_OTAA_SILENT;
     } else if (strncmp(buf,"busy",4)==0) {
+        UART_PRINT(buf);
         return ERROR_OTAA_BUSY;
     } else if (strncmp(buf,"mac_paused",10)==0) {
+        UART_PRINT(buf);
         return ERROR_OTAA_MAC_PAUSED;
     } else {
         return ERROR_OTAA_UNKNOWN;
