@@ -206,13 +206,6 @@ void *mainThread(void *arg0)
     sz = GetLine_UART(uart1, buf);
     UART_PRINT(buf);
 
-    /* Get version FW */
-    strcpy(Command,"sys get ver\r\n");
-    UART_write(uart1, (const char *)(Command), strlen(Command));
-    UART_PRINT(Command);
-    sz = GetLine_UART(uart1, buf);
-    UART_PRINT(buf);
-
     /* Get DevEUI */
     memset(&buf,0, sizeof(buf));
     strcpy(Command,"sys get hweui\r\n");
@@ -235,7 +228,6 @@ void *mainThread(void *arg0)
     if (strncmp(buf,"ok",2)==0) {
         UART_write(uart0,"mac set deveui successful\r\n",27);
     }
-
 
     /* Enter AppEui */
     memset(&buf,0, sizeof(buf));
@@ -281,13 +273,16 @@ void *mainThread(void *arg0)
         UART_write(uart0,"mac set appkey successful\r\n",27);
     }
 
-    /* Get version FW */
-/*    strcpy(Command,"radio set sf sf7\r\n");
+    /* Set adr on */
+    strcpy(Command,"mac set adr on\r\n");
     UART_write(uart1, (const char *)(Command), strlen(Command));
     UART_PRINT(Command);
     sz = GetLine_UART(uart1, buf);
     UART_PRINT(buf);
-*/
+    if (strncmp(buf,"ok",2)==0) {
+        UART_write(uart0,"mac set adr successful\r\n",24);
+    }
+
     /* Save the results to RN2384 EEPROM */
     ret = Mac_Save(uart1);
     if (ret==0) {
@@ -312,12 +307,15 @@ void *mainThread(void *arg0)
     UART_PRINT(buf);
     UART_PRINT("\r\n");
 
+
     /* Join otaa */
     ret = Join_Otaa_Lora(uart1);
     if (ret==SUCCESS_OTAA_LORA) {
         strcpy(Mess,"Join_Otaa_Lora() Success\r\n");
         UART_write(uart0, Mess, strlen(Mess));
 
+        /* Get devaddr */
+        memset(&buf,0, sizeof(buf));
         strcpy(Command,"mac get devaddr\r\n");
         UART_write(uart1, (const char *)(Command), strlen(Command));
         UART_PRINT(Command);
@@ -325,6 +323,8 @@ void *mainThread(void *arg0)
         UART_PRINT(buf);
         strncpy(MyLoraNode.DevAddr,buf,8);
 
+        /* Set devaddr */
+        memset(&buf,0, sizeof(buf));
         strcpy(Command,"mac set devaddr ");
         strncat(Command, MyLoraNode.DevAddr,8);
         strcat(Command,"\r\n");
@@ -332,10 +332,8 @@ void *mainThread(void *arg0)
         UART_PRINT(Command);
         sz = GetLine_UART(uart1, buf);
         UART_PRINT(buf);
-        if (strncmp(buf,"ok",2)!=0) {
-            return ERROR_SET_DEVADDR;
-        } else {
-            return SUCCESS_SET_DEVADDR;
+        if (strncmp(buf,"ok",2)==0) {
+            UART_write(uart0,"mac set devaddr successful\r\n",28);
         }
 
         /* Set AppsKey */
@@ -356,7 +354,7 @@ void *mainThread(void *arg0)
         UART_PRINT(Command);
         sz = GetLine_UART(uart1, buf);
         if (strncmp(buf,"ok",2)==0) {
-            UART_write(uart0,"mac set appskey successful\r\n",27);
+            UART_write(uart0,"mac set appskey successful\r\n",28);
         }
 
         /* Set NwksKey */
@@ -377,16 +375,16 @@ void *mainThread(void *arg0)
         UART_PRINT(Command);
         sz = GetLine_UART(uart1, buf);
         if (strncmp(buf,"ok",2)==0) {
-            UART_write(uart0,"mac set NwksKey successful\r\n",27);
+            UART_write(uart0,"mac set NwksKey successful\r\n",28);
         }
-
-
     } else {
         strcpy(Mess,"Join_Otaa_Lora() Failed\r\n");
         UART_write(uart0, Mess, strlen(Mess));  //cambiado a uart0
         Mess[0] = '('; Mess[1] = ret+48; Mess[2]=')';
         UART_write(uart0, Mess,3);  //cambiado a uart0
         UART_write(uart0, "\r\n",2);    //cambiado a uart0
+
+
     }
 
     /* Save the results to RN2384 EEPROM */
