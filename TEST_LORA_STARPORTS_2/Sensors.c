@@ -185,7 +185,6 @@ uint8_t GetSensorData(uint8_t *DataPacket) {
 
     if (spi != NULL) {
 
-        /*
         ADXL355_Enable();
         ADXL355_SPI_Enable();
         usleep(100);
@@ -199,15 +198,15 @@ uint8_t GetSensorData(uint8_t *DataPacket) {
             // Get Accelerometer Data
             ADXL355_Get_Accel_Frame(spi, MyADXL.NSamples, s32DataSensor);
             // Add ADXL355 Data to Packet
-            DataPacketLen = Add_s32Data2Packet(DataPacket, DataPacketLen, MyADXL.SensorId, s32DataSensor, 6);
+            if (MyNode.NBoot==0) {
+                DataPacketLen = Add_s32Data2Packet(DataPacket, DataPacketLen, MyADXL.SensorId, s32DataSensor, 6);
+            }
             UART_write(uart0, "4 ",2); // Debug Message
         }
         // Watchdog_clear(wd);
         ADXL355_SPI_Disable();
         ADXL355_Disable();
-        */
 
-        usleep(5000);
         BME280_Enable();
         BME280_SPI_Enable();
         usleep(100);
@@ -228,7 +227,9 @@ uint8_t GetSensorData(uint8_t *DataPacket) {
             s32DataSensor[0] = compensate_pressure(PressureUn, MyCalib);
 
             // Add BME280 Data to Packet
-            DataPacketLen = Add_s32Data2Packet(DataPacket, DataPacketLen, MyBME.SensorId, s32DataSensor, 3);
+            if (MyNode.NBoot==1) {
+                DataPacketLen = Add_s32Data2Packet(DataPacket, DataPacketLen, MyBME.SensorId, s32DataSensor, 3);
+            }
             UART_write(uart0, "5\r\n ",3); // Debug Message
         }
         free(MyCalib);
