@@ -406,8 +406,6 @@ void *mainThread(void *arg0)
     UART_close(uart1);
     // UART_close(uart0);
 
-    usleep(5000);
-
     Node_Disable();
 
 }
