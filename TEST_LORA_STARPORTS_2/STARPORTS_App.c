@@ -157,10 +157,8 @@ void *mainThread(void *arg0)
 
     /* Get Param Values from internal filesystem */
     MyLoraNode.PortNoTx = 1;
-    strcpy(&(MyLoraNode.DevAddr),"260128C2");
-    strcpy(&(MyLoraNode.NwksKey),"0381FC8968C56A38EAAB93E9B4A2B91A");
-    strcpy(&(MyLoraNode.AppsKey),"029488133ECEBA746B6B77797340C134");
-
+    // Get MyNodeId
+    MyNode.NodeId = st_readFileNodeId();
     // Get MyNode.WakeUpInterval --> Read WakeUp_Time File
     MyNode.WakeUpInterval = st_readFileWakeUp();
     // Get MyNode.Mode --> Read File Mode
