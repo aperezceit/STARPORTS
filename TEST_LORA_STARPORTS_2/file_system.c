@@ -818,6 +818,99 @@ int st_readFileWakeUp()
     return (atoi(&buffer));
 }
 
+//////////////////////////////////////////////
+/* Escribir y leer en archivo NODEID*/
+//////////////////////////////////////////////
+int writeNodeId(uint16_t NodeId)
+{
+
+    int RetVal = 0;
+    _i32 offset = 0;
+    _i32 fd;
+    unsigned char nodeid[32];
+
+    sprintf(&nodeid,"%d",NodeId );
+
+
+    fd = sl_FsOpen(FS_NODEID, SL_FS_OVERWRITE, 0);
+    if (fd < 0)
+    {
+        //UART_PRINT("Error opening the file : %s\n\r", FS_NODEID);
+    }
+    else
+    {
+//        //UART_PRINT("file opened: %s\n\r", FS_NODEID);
+
+        RetVal = sl_FsWrite(fd, 0, nodeid, strlen(nodeid));
+        if (RetVal <= 0)
+        {
+            //UART_PRINT("Writing error:  %d\n\r" ,RetVal);
+            return RetVal;
+        }
+        //UART_PRINT("WRITING NodeId: %s\n\r", nodeid);
+
+        RetVal = sl_FsClose(fd, 0, 0, 0);
+        if (RetVal < 0)
+        {
+            //UART_PRINT("Error closing the file : %s\n\r", FS_NODEID);
+        }
+        else
+        {
+//            //UART_PRINT("File closed : %s\n\r", FS_NODEID);
+        }
+    }
+    return offset;
+}
+
+int st_readFileNodeId()
+{
+    int offset = 0;
+    int RetVal = 0;
+    _i8 buffer[MAX_FILE_SIZE];
+    int32_t fd;
+
+    fd = sl_FsOpen(FS_NODEID, SL_FS_READ, 0);
+    if (fd < 0)
+    {
+        //UART_PRINT("\r\nError opening the file : %s\n\r", FS_NODEID);
+    }
+    else
+    {
+//        //UART_PRINT("\r\nfile opened for read: %s\n\r", FS_NODEID);
+    }
+
+    while(RetVal=sl_FsRead(fd, offset, &buffer[0], MAX_FILE_SIZE)>1)
+    {
+        if(strlen(buffer)!=0)
+            {
+        if(RetVal == SL_ERROR_FS_OFFSET_OUT_OF_RANGE)
+        {// EOF
+            break;
+        }
+        if(RetVal < 0)
+        {// Error
+            //UART_PRINT("sl_FsRead error: %d\n\r", RetVal);
+            return RetVal;
+        }
+        offset += strlen(buffer);
+        }
+
+    }
+    //UART_PRINT("READING NODEID: %d \n\r", atoi(&buffer));
+
+    RetVal = sl_FsClose(fd, 0, 0, 0);
+    if (RetVal < 0)
+    {
+        //UART_PRINT("Error closing the file : %s\n\r", FS_NODEID);
+    }
+    else
+    {
+//        //UART_PRINT("File closed for read: %s\n\r", FS_NODEID);
+    }
+
+    return (atoi(&buffer));
+}
+
 ////////////////////////////////////
 /* Escribir y leer en archivo SSID*/
 ////////////////////////////////////

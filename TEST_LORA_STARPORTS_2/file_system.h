@@ -21,6 +21,7 @@
 #define FS_NFAILS       "nfails"
 #define FS_UPCNTR       "upcntr"
 #define FS_DNCNTR       "dncntr"
+#define FS_NODEID       "nodeid"
 ////////////////////////
 
 #define CERTIFICATE "dummy-trusted-cert"
@@ -51,6 +52,8 @@ int writeMode(uint8_t Mode);
 int st_readFileMode();
 int writeWakeUp(uint16_t WakeUpInterval);
 int st_readFileWakeUp();
+writeNodeId(uint16_t NodeId);
+int st_readFileNodeId();
 int writeSSID(unsigned char *SSID);
 int st_readFileSSID(unsigned char *ssid);
 int deleteFile();
