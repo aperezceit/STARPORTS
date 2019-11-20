@@ -808,38 +808,35 @@ uint8_t hex2int(unsigned char *hex, uint8_t hlen, uint8_t *bytes) {
 uint8_t GetLoraServerParams(uint8_t *bytes, uint8_t blen, struct LoraNode *MyLoraNode) {
 
     uint8_t mask = bytes[0];
-    uint16_t nodeId = (bytes[1] << 8) | bytes[2];
-    int inext = 3;
+    int inext = 1;
 
-    if (MyNode.NodeId==nodeId) {
-        if ((mask&0x01)!=0) {   // WakeUpInterval
-            MyNode.WakeUpInterval = (bytes[inext]<<8) | bytes[inext+1];
-            inext = inext+2;
-        }
+    if ((mask&0x01)!=0) {   // WakeUpInterval
+        MyNode.WakeUpInterval = (bytes[inext]<<8) | bytes[inext+1];
+        inext = inext+2;
+    }
 
-        if ((mask&0x02)!=0) {
-            MyNode.Mode = (bytes[inext] & 0x07);
-            inext = inext+1;
-        }
+    if ((mask&0x02)!=0) {
+        MyNode.Mode = (bytes[inext] & 0x07);
+        inext = inext+1;
+    }
 
-        if ((mask&0x04)!=0) {
-            MyNode.SSID[5] = (char)(bytes[inext]);
-            MyNode.SSID[4] = (char)(bytes[inext+1]);
-            MyNode.SSID[3] = (char)(bytes[inext+2]);
-            MyNode.SSID[2] = (char)(bytes[inext+3]);
-            MyNode.SSID[1] = (char)(bytes[inext+4]);
-            MyNode.SSID[0] = (char)(bytes[inext+5]);
-            inext = inext + 6;
-        }
+    if ((mask&0x04)!=0) {
+        MyNode.SSID[5] = (char)(bytes[inext]);
+        MyNode.SSID[4] = (char)(bytes[inext+1]);
+        MyNode.SSID[3] = (char)(bytes[inext+2]);
+        MyNode.SSID[2] = (char)(bytes[inext+3]);
+        MyNode.SSID[1] = (char)(bytes[inext+4]);
+        MyNode.SSID[0] = (char)(bytes[inext+5]);
+        inext = inext + 6;
+    }
 
-        if ((mask&0x08)!=0) {
-            MyNode.NCycles = bytes[inext];
-            inext = inext + 1;
-        }
+    if ((mask&0x08)!=0) {
+        MyNode.NCycles = bytes[inext];
+        inext = inext + 1;
+    }
 
-        if ((mask&0x10)!=0) {
-            MyLoraNode->Upctr = (bytes[inext]<<16) | (bytes[inext+1]<<8) | (bytes[inext+2]);
-        }
+    if ((mask&0x10)!=0) {
+        MyLoraNode->Upctr = (bytes[inext]<<16) | (bytes[inext+1]<<8) | (bytes[inext+2]);
     }
 
     return 0;
