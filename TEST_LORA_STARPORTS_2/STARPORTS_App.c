@@ -147,7 +147,7 @@ void *mainThread(void *arg0)
     SPI_init(); //necesario inicializar SPI antes de sl_Start
     sl_Start(0, 0, 0); //necesario para poder trabajar con FS
 
-    ret = sl_NetCfgGet(SL_NETCFG_MAC_ADDRESS_GET,NULL,&macAddressLen,&macAddress[0]);
+//    ret = sl_NetCfgGet(SL_NETCFG_MAC_ADDRESS_GET,NULL,&macAddressLen,&macAddress[0]);
 
     uart0 = Startup_UART(Board_UART0, 115200); // arrancado antes de leer para debug
 
