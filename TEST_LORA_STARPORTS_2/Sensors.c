@@ -4,7 +4,7 @@
  *  Created on: 2 may. 2019
  *      Author: airizar
  */
-
+/////comentario de prueba github
 #include <stdlib.h>
 #include <ti/drivers/I2C.h>
 #include <ti/drivers/UART.h>
