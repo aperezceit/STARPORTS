@@ -4,7 +4,7 @@
  *  Created on: 29 may. 2019
  *      Author: airizar
  */
-//gituhub test
+
 #include "STARPORTS_App.h"
 #include "BME280.h"
 #include "hal_SPI.h"

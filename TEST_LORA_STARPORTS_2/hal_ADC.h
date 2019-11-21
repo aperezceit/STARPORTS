@@ -5,6 +5,7 @@
  *      Author: airizar
  */
 
+
 #ifndef HAL_ADC_H_
 #define HAL_ADC_H_
 
