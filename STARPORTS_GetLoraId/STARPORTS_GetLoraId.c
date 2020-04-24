@@ -199,6 +199,8 @@ void *mainThread(void *arg0)
 
     memset(&MyLoraNode,0, sizeof(MyLoraNode));
 
+    MyLoraNode.PortNoTx = 1;
+
     /* Factory reset */
     strcpy(Command,"sys factoryRESET\r\n");
     UART_write(uart1, (const char *)(Command), strlen(Command));
@@ -229,6 +231,29 @@ void *mainThread(void *arg0)
         UART_write(uart0,"mac set deveui successful\r\n",27);
     }
 
+    /* Enter DEVEUI *//*
+    memset(&buf,0, sizeof(buf));
+    UART_write(uart0,"Enter DevEui: ",14);
+    sz = GetLine_UART(uart0, buf);
+    strncpy(MyLoraNode.DevEui, buf,16);
+
+    UART_write(uart0, "DEVEui entered is ", 18);
+    UART_write(uart0, &MyLoraNode.DevEui, 16);
+    UART_write(uart0,"\r\n",2);
+*/
+    /* Set DEVEUI *//*
+    memset(&buf,0, sizeof(buf));
+    strcpy(Command,"mac set deveui ");
+    strncat(Command, &MyLoraNode.DevEui,16);
+    strcat(Command, "\r\n");
+    UART_write(uart1, (const char *)Command, strlen(Command));
+    UART_PRINT(Command);
+    sz = GetLine_UART(uart1, buf);
+    if (strncmp(buf,"ok",2)==0) {
+        UART_write(uart0,"mac set deveui successful\r\n",27);
+    }
+*/
+
     /* Enter AppEui */
     memset(&buf,0, sizeof(buf));
     UART_write(uart0,"Enter AppEui: ",14);
@@ -250,7 +275,6 @@ void *mainThread(void *arg0)
     if (strncmp(buf,"ok",2)==0) {
         UART_write(uart0,"mac set appeui successful\r\n",27);
     }
-
     /* Enter AppKey */
     memset(&buf,0, sizeof(buf));
     UART_write(uart0,"Enter AppKey: ",14);
@@ -272,7 +296,6 @@ void *mainThread(void *arg0)
     if (strncmp(buf,"ok",2)==0) {
         UART_write(uart0,"mac set appkey successful\r\n",27);
     }
-
     /* Set adr on */
     strcpy(Command,"mac set adr on\r\n");
     UART_write(uart1, (const char *)(Command), strlen(Command));
@@ -282,13 +305,20 @@ void *mainThread(void *arg0)
     if (strncmp(buf,"ok",2)==0) {
         UART_write(uart0,"mac set adr successful\r\n",24);
     }
-
+    /* Set data rate */
+    strcpy(Command,"mac set dr 5\r\n");
+    UART_write(uart1, (const char *)(Command), strlen(Command));
+    UART_PRINT(Command);
+    sz = GetLine_UART(uart1, buf);
+    UART_PRINT(buf);
+    if (strncmp(buf,"ok",2)==0) {
+        UART_write(uart0,"mac set dr successful\r\n",23);
+    }
     /* Save the results to RN2384 EEPROM */
     ret = Mac_Save(uart1);
     if (ret==0) {
         UART_write(uart0,"mac save successful\r\n",21);
     }
-
     /* Check DevEUI */
     memset(&buf,0, sizeof(buf));
     strcpy(Command,"mac get deveui\r\n");
@@ -306,7 +336,6 @@ void *mainThread(void *arg0)
     sz = GetLine_UART(uart1, buf);
     UART_PRINT(buf);
     UART_PRINT("\r\n");
-
 
     /* Join otaa */
     ret = Join_Otaa_Lora(uart1);
@@ -335,7 +364,26 @@ void *mainThread(void *arg0)
         if (strncmp(buf,"ok",2)==0) {
             UART_write(uart0,"mac set devaddr successful\r\n",28);
         }
+        /* Set NwksKey */
+        memset(&buf,0, sizeof(buf));
+        UART_write(uart0,"Enter NwksKey: ",15);
+        sz = GetLine_UART(uart0, buf);
+        strncpy(MyLoraNode.NwksKey, buf,32);
 
+        UART_write(uart0, "NwksKey entered is ", 19);
+        UART_write(uart0, &MyLoraNode.NwksKey, 32);
+        UART_write(uart0,"\r\n",2);
+
+        memset(&buf,0, sizeof(buf));
+        strcpy(Command,"mac set nwkskey ");
+        strncat(Command, &MyLoraNode.NwksKey,32);
+        strcat(Command, "\r\n");
+        UART_write(uart1, (const char *)Command, strlen(Command));
+        UART_PRINT(Command);
+        sz = GetLine_UART(uart1, buf);
+        if (strncmp(buf,"ok",2)==0) {
+            UART_write(uart0,"mac set NwksKey successful\r\n",28);
+        }
         /* Set AppsKey */
         memset(&buf,0, sizeof(buf));
         UART_write(uart0,"Enter AppsKey: ",15);
@@ -355,6 +403,34 @@ void *mainThread(void *arg0)
         sz = GetLine_UART(uart1, buf);
         if (strncmp(buf,"ok",2)==0) {
             UART_write(uart0,"mac set appskey successful\r\n",28);
+        }
+    } else {
+        strcpy(Mess,"Join_Otaa_Lora() Failed\r\n");
+        UART_write(uart0, Mess, strlen(Mess));  //cambiado a uart0
+        Mess[0] = '('; Mess[1] = ret+48; Mess[2]=')';
+        UART_write(uart0, Mess,3);  //cambiado a uart0
+        UART_write(uart0, "\r\n",2);    //cambiado a uart0
+
+        /* Get devaddr */
+        memset(&buf,0, sizeof(buf));
+        strcpy(Command,"mac get devaddr\r\n");
+        UART_write(uart1, (const char *)(Command), strlen(Command));
+        UART_PRINT(Command);
+        sz = GetLine_UART(uart1, buf);
+        UART_PRINT(buf);
+        strncpy(MyLoraNode.DevAddr,buf,8);
+
+        /* Set devaddr */
+        memset(&buf,0, sizeof(buf));
+        strcpy(Command,"mac set devaddr ");
+        strncat(Command, MyLoraNode.DevAddr,8);
+        strcat(Command,"\r\n");
+        UART_write(uart1, (const char *)Command, strlen(Command));
+        UART_PRINT(Command);
+        sz = GetLine_UART(uart1, buf);
+        UART_PRINT(buf);
+        if (strncmp(buf,"ok",2)==0) {
+            UART_write(uart0,"mac set devaddr successful\r\n",28);
         }
 
         /* Set NwksKey */
@@ -377,14 +453,27 @@ void *mainThread(void *arg0)
         if (strncmp(buf,"ok",2)==0) {
             UART_write(uart0,"mac set NwksKey successful\r\n",28);
         }
-    } else {
-        strcpy(Mess,"Join_Otaa_Lora() Failed\r\n");
-        UART_write(uart0, Mess, strlen(Mess));  //cambiado a uart0
-        Mess[0] = '('; Mess[1] = ret+48; Mess[2]=')';
-        UART_write(uart0, Mess,3);  //cambiado a uart0
-        UART_write(uart0, "\r\n",2);    //cambiado a uart0
 
+        /* Set AppsKey */
+        memset(&buf,0, sizeof(buf));
+        UART_write(uart0,"Enter AppsKey: ",15);
+        sz = GetLine_UART(uart0, buf);
+        strncpy(MyLoraNode.AppsKey, buf,32);
 
+        UART_write(uart0, "AppsKey entered is ", 19);
+        UART_write(uart0, &MyLoraNode.AppsKey, 32);
+        UART_write(uart0,"\r\n",2);
+
+        memset(&buf,0, sizeof(buf));
+        strcpy(Command,"mac set appskey ");
+        strncat(Command, &MyLoraNode.AppsKey,32);
+        strcat(Command, "\r\n");
+        UART_write(uart1, (const char *)Command, strlen(Command));
+        UART_PRINT(Command);
+        sz = GetLine_UART(uart1, buf);
+        if (strncmp(buf,"ok",2)==0) {
+            UART_write(uart0,"mac set appskey successful\r\n",28);
+        }
     }
 
     /* Save the results to RN2384 EEPROM */

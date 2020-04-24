@@ -22,6 +22,11 @@
 #define FS_UPCNTR       "upcntr"
 #define FS_DNCNTR       "dncntr"
 #define FS_NODEID       "nodeid"
+
+#define FS_PAYLOAD      "payload"
+#define FS_CYCLES        "cycles"
+#define FS_ITER         "iter"
+#define FS_COUNT         "count"
 ////////////////////////
 
 #define CERTIFICATE "dummy-trusted-cert"
@@ -58,5 +63,13 @@ int writeSSID(unsigned char *SSID);
 int st_readFileSSID(unsigned char *ssid);
 int deleteFile();
 int newFile();
+int writePayload(uint16_t Payload);
+int st_readFilePayload();
+int writeCycles(uint16_t Cycles);
+int st_readFileCycles();
+int writeIter(uint16_t Iter);
+int st_readFileIter();
+int writeCount(uint16_t Count);
+int st_readFileCount();
 
 #endif /* FILE_SYSTEM_H_ */

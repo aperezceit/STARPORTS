@@ -10,7 +10,7 @@
 /////////////////////////////////////
 
 #define PORT                        (9000)
-#define DEST_IP_ADDR                SL_IPV4_VAL(192,168,4,100)
+#define DEST_IP_ADDR                SL_IPV4_VAL(192,168,5,1)
 #define NUM_OF_PKT                  (10)
 #define FRAME_LENGTH                (1000)
 
@@ -22,10 +22,10 @@
 #define SUCCESS_CONNECT_WIFI 0
 #define ERROR_CONNECT_WIFI   1
 
-#define SSID_NAME           "Movistar_361D"                 /* AP SSID */
+#define SSID_NAME           "PORTS2"                 /* AP SSID */
 #define SECURITY_TYPE       SL_WLAN_SEC_TYPE_WPA_WPA2       /* Security type (OPEN or WEP or WPA*/
-#define SECURITY_KEY        "95MFQQL7791"                   /* Password of the secured AP */
-#define SECURITY_KEY_FILE_CONNECT        "95MFQQL7791"                   /* Password of the secured AP */
+#define SECURITY_KEY        "1234567890"                   /* Password of the secured AP */
+#define SECURITY_KEY_FILE_CONNECT        "1234567890"                   /* Password of the secured AP */
 
 #define LOOP_FOREVER() \
     { \

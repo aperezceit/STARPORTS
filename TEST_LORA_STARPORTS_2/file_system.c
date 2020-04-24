@@ -178,7 +178,7 @@ int writeNFails(uint16_t NFails){
     fd = sl_FsOpen(FS_NFAILS, SL_FS_OVERWRITE, 0);
     if (fd < 0)
     {
-        //UART_PRINT("Error opening the file : %s\n\r", FS_NFAILS);
+        UART_PRINT("Error opening the file : %s\n\r", FS_NFAILS);
     }
     else
     {
@@ -187,15 +187,15 @@ int writeNFails(uint16_t NFails){
         RetVal = sl_FsWrite(fd, 0, fails, strlen(fails));
         if (RetVal <= 0)
         {
-            //UART_PRINT("Writing error:  %d\n\r" ,RetVal);
+            UART_PRINT("Writing error:  %d\n\r" ,RetVal);
             return RetVal;
         }
-        //UART_PRINT("WRITING NFAILS: %s\n\r", fails);
+        UART_PRINT("WRITING NFAILS: %s\n\r", fails);
 
         RetVal = sl_FsClose(fd, 0, 0, 0);
         if (RetVal < 0)
         {
-            //UART_PRINT("Error closing the file : %s\n\r", FS_NFAILS);
+            UART_PRINT("Error closing the file : %s\n\r", FS_NFAILS);
         }
         else
         {
@@ -216,7 +216,7 @@ int st_readFileNFails()
     fd = sl_FsOpen(FS_NFAILS, SL_FS_READ, 0);
     if (fd < 0)
     {
-        //UART_PRINT("\r\nError opening the file : %s\n\r", FS_NFAILS);
+        UART_PRINT("\r\nError opening the file : %s\n\r", FS_NFAILS);
     }
     else
     {
@@ -233,19 +233,19 @@ int st_readFileNFails()
         }
         if(RetVal < 0)
         {// Error
-            //UART_PRINT("sl_FsRead error: %d\n\r", RetVal);
+            UART_PRINT("sl_FsRead error: %d\n\r", RetVal);
             return RetVal;
         }
         offset += strlen(buffer);
         }
 
     }
-    //UART_PRINT("READING NFAILS: %d \n\r", atoi(&buffer));
+    UART_PRINT("READING NFAILS: %d \n\r", atoi(&buffer));
 
     RetVal = sl_FsClose(fd, 0, 0, 0);
     if (RetVal < 0)
     {
-        //UART_PRINT("Error closing the file : %s\n\r", FS_NFAILS);
+        UART_PRINT("Error closing the file : %s\n\r", FS_NFAILS);
     }
     else
     {
@@ -276,7 +276,7 @@ int writeNBoot(uint8_t FirstBoot)
     fd = sl_FsOpen(FS_NBOOT, SL_FS_OVERWRITE, 0);
     if (fd < 0)
     {
-        //UART_PRINT("Error opening the file : %s\n\r", FS_NBOOT);
+        UART_PRINT("Error opening the file : %s\n\r", FS_NBOOT);
     }
     else
     {
@@ -285,15 +285,15 @@ int writeNBoot(uint8_t FirstBoot)
         RetVal = sl_FsWrite(fd, 0, fboot, strlen(fboot));
         if (RetVal <= 0)
         {
-            //UART_PRINT("Writing error:  %d\n\r" ,RetVal);
+            UART_PRINT("Writing error:  %d\n\r" ,RetVal);
             return RetVal;
         }
-        //UART_PRINT("WRITING FIRSTBOOT: %s\n\r", fboot);
+        UART_PRINT("WRITING FIRSTBOOT: %s\n\r", fboot);
 
         RetVal = sl_FsClose(fd, 0, 0, 0);
         if (RetVal < 0)
         {
-            //UART_PRINT("Error closing the file : %s\n\r", FS_NBOOT);
+            UART_PRINT("Error closing the file : %s\n\r", FS_NBOOT);
         }
         else
         {
@@ -314,7 +314,7 @@ int st_readFileNBoot()
     fd = sl_FsOpen(FS_NBOOT, SL_FS_READ, 0);
     if (fd < 0)
     {
-        //UART_PRINT("\r\nError opening the file : %s\n\r", FS_NBOOT);
+        UART_PRINT("\r\nError opening the file : %s\n\r", FS_NBOOT);
     }
     else
     {
@@ -331,23 +331,23 @@ int st_readFileNBoot()
         }
         if(RetVal < 0)
         {// Error
-            //UART_PRINT("sl_FsRead error: %d\n\r", RetVal);
+            UART_PRINT("sl_FsRead error: %d\n\r", RetVal);
             return RetVal;
         }
         offset += strlen(buffer);
         }
 
     }
-    //UART_PRINT("READING NBOOT: %d \n\r", atoi(&buffer));
+    UART_PRINT("READING NBOOT: %d \n\r", atoi(&buffer));
 
     RetVal = sl_FsClose(fd, 0, 0, 0);
     if (RetVal < 0)
     {
-        // //UART_PRINT("Error closing the file : %s\n\r", FS_FIRST_BOOT);
+        UART_PRINT("Error closing the file : %s\n\r", FS_NBOOT);
     }
     else
     {
-        // //UART_PRINT("File closed for read: %s\n\r", FS_FIRST_BOOT);
+        // //UART_PRINT("File closed for read: %s\n\r", FS_NBOOT);
     }
 
     return (atoi(&buffer));
@@ -370,7 +370,7 @@ int writeNCycles(uint8_t NCycles)
     fd = sl_FsOpen(FS_NCYCLES, SL_FS_OVERWRITE, 0);
     if (fd < 0)
     {
-        //UART_PRINT("Error opening the file : %s\n\r", FS_NCYCLES);
+        UART_PRINT("Error opening the file : %s\n\r", FS_NCYCLES);
     }
     else
     {
@@ -379,15 +379,15 @@ int writeNCycles(uint8_t NCycles)
         RetVal = sl_FsWrite(fd, 0, ncycles, strlen(ncycles));
         if (RetVal <= 0)
         {
-            //UART_PRINT("Writing error:  %d\n\r" ,RetVal);
+            UART_PRINT("Writing error:  %d\n\r" ,RetVal);
             return RetVal;
         }
-        //UART_PRINT("WRITING NCYCLES: %s\n\r", ncycles);
+        UART_PRINT("WRITING NCYCLES: %s\n\r", ncycles);
 
         RetVal = sl_FsClose(fd, 0, 0, 0);
         if (RetVal < 0)
         {
-            //UART_PRINT("Error closing the file : %s\n\r", FS_NCYCLES);
+            UART_PRINT("Error closing the file : %s\n\r", FS_NCYCLES);
         }
         else
         {
@@ -407,7 +407,7 @@ int st_readFileNCycles()
     fd = sl_FsOpen(FS_NCYCLES, SL_FS_READ, 0);
     if (fd < 0)
     {
-        //UART_PRINT("\r\nError opening the file : %s\n\r", FS_NCYCLES);
+        UART_PRINT("\r\nError opening the file : %s\n\r", FS_NCYCLES);
     }
     else
     {
@@ -424,19 +424,19 @@ int st_readFileNCycles()
         }
         if(RetVal < 0)
         {// Error
-            //UART_PRINT("sl_FsRead error: %d\n\r", RetVal);
+            UART_PRINT("sl_FsRead error: %d\n\r", RetVal);
             return RetVal;
         }
         offset += strlen(buffer);
         }
 
     }
-    //UART_PRINT("READING NCYCLES: %d \n\r", atoi(&buffer));
+    UART_PRINT("READING NCYCLES: %d \n\r", atoi(&buffer));
 
     RetVal = sl_FsClose(fd, 0, 0, 0);
     if (RetVal < 0)
     {
-        //UART_PRINT("Error closing the file : %s\n\r", FS_NCYCLES);
+        UART_PRINT("Error closing the file : %s\n\r", FS_NCYCLES);
     }
     else
     {
@@ -463,7 +463,7 @@ int writeUpCntr(uint32_t Upctr)
     fd = sl_FsOpen(FS_UPCNTR, SL_FS_OVERWRITE, 0);
     if (fd < 0)
     {
-        //UART_PRINT("Error opening the file : %s\n\r", FS_UPCNTR);
+        UART_PRINT("Error opening the file : %s\n\r", FS_UPCNTR);
     }
     else
     {
@@ -472,15 +472,15 @@ int writeUpCntr(uint32_t Upctr)
         RetVal = sl_FsWrite(fd, 0, upctr, strlen(upctr));
         if (RetVal <= 0)
         {
-            //UART_PRINT("Writing error:  %d\n\r" ,RetVal);
+            UART_PRINT("Writing error:  %d\n\r" ,RetVal);
             return RetVal;
         }
-        //UART_PRINT("WRITING UPCNTR: %s\n\r", upctr);
+        UART_PRINT("WRITING UPCNTR: %s\n\r", upctr);
 
         RetVal = sl_FsClose(fd, 0, 0, 0);
         if (RetVal < 0)
         {
-            //UART_PRINT("Error closing the file : %s\n\r", FS_UPCNTR);
+            UART_PRINT("Error closing the file : %s\n\r", FS_UPCNTR);
         }
         else
         {
@@ -500,7 +500,7 @@ int st_readFileUpCntr()
     fd = sl_FsOpen(FS_UPCNTR, SL_FS_READ, 0);
     if (fd < 0)
     {
-        //UART_PRINT("\r\nError opening the file : %s\n\r", FS_UPCNTR);
+        UART_PRINT("\r\nError opening the file : %s\n\r", FS_UPCNTR);
     }
     else
     {
@@ -517,19 +517,19 @@ int st_readFileUpCntr()
         }
         if(RetVal < 0)
         {// Error
-            //UART_PRINT("sl_FsRead error: %d\n\r", RetVal);
+            UART_PRINT("sl_FsRead error: %d\n\r", RetVal);
             return RetVal;
         }
         offset += strlen(buffer);
         }
 
     }
-    //UART_PRINT("READING UPCNTR: %d \n\r", atoi(&buffer));
+    UART_PRINT("READING UPCNTR: %d \n\r", atoi(&buffer));
 
     RetVal = sl_FsClose(fd, 0, 0, 0);
     if (RetVal < 0)
     {
-        //UART_PRINT("Error closing the file : %s\n\r", FS_UPCNTR);
+        UART_PRINT("Error closing the file : %s\n\r", FS_UPCNTR);
     }
     else
     {
@@ -556,7 +556,7 @@ int writeDnCntr(uint32_t Dnctr)
     fd = sl_FsOpen(FS_DNCNTR, SL_FS_OVERWRITE, 0);
     if (fd < 0)
     {
-        //UART_PRINT("Error opening the file : %s\n\r", FS_DNCNTR);
+        UART_PRINT("Error opening the file : %s\n\r", FS_DNCNTR);
     }
     else
     {
@@ -565,15 +565,15 @@ int writeDnCntr(uint32_t Dnctr)
         RetVal = sl_FsWrite(fd, 0, dnctr, strlen(dnctr));
         if (RetVal <= 0)
         {
-            //UART_PRINT("Writing error:  %d\n\r" ,RetVal);
+            UART_PRINT("Writing error:  %d\n\r" ,RetVal);
             return RetVal;
         }
-        //UART_PRINT("WRITING DNCNTR: %s\n\r", dnctr);
+        UART_PRINT("WRITING DNCNTR: %s\n\r", dnctr);
 
         RetVal = sl_FsClose(fd, 0, 0, 0);
         if (RetVal < 0)
         {
-            //UART_PRINT("Error closing the file : %s\n\r", FS_DNCNTR);
+            UART_PRINT("Error closing the file : %s\n\r", FS_DNCNTR);
         }
         else
         {
@@ -593,7 +593,7 @@ int st_readFileDnCntr()
     fd = sl_FsOpen(FS_DNCNTR, SL_FS_READ, 0);
     if (fd < 0)
     {
-        //UART_PRINT("\r\nError opening the file : %s\n\r", FS_DNCNTR);
+        UART_PRINT("\r\nError opening the file : %s\n\r", FS_DNCNTR);
     }
     else
     {
@@ -610,19 +610,19 @@ int st_readFileDnCntr()
         }
         if(RetVal < 0)
         {// Error
-            //UART_PRINT("sl_FsRead error: %d\n\r", RetVal);
+            UART_PRINT("sl_FsRead error: %d\n\r", RetVal);
             return RetVal;
         }
         offset += strlen(buffer);
         }
 
     }
-    //UART_PRINT("READING DNCNTR: %d \n\r", atoi(&buffer));
+    UART_PRINT("READING DNCNTR: %d \n\r", atoi(&buffer));
 
     RetVal = sl_FsClose(fd, 0, 0, 0);
     if (RetVal < 0)
     {
-        //UART_PRINT("Error closing the file : %s\n\r", FS_DNCNTR);
+        UART_PRINT("Error closing the file : %s\n\r", FS_DNCNTR);
     }
     else
     {
@@ -649,7 +649,7 @@ int writeMode(uint8_t Mode)
     fd = sl_FsOpen(FS_MODE, SL_FS_OVERWRITE, 0);
     if (fd < 0)
     {
-        //UART_PRINT("Error opening the file : %s\n\r", FS_MODE);
+        UART_PRINT("Error opening the file : %s\n\r", FS_MODE);
     }
     else
     {
@@ -658,15 +658,15 @@ int writeMode(uint8_t Mode)
         RetVal = sl_FsWrite(fd, 0, mode, strlen(mode));
         if (RetVal <= 0)
         {
-            //UART_PRINT("Writing error:  %d\n\r" ,RetVal);
+            UART_PRINT("Writing error:  %d\n\r" ,RetVal);
             return RetVal;
         }
-        //UART_PRINT("WRITING MODE: %s\n\r", mode);
+        UART_PRINT("WRITING MODE: %s\n\r", mode);
 
         RetVal = sl_FsClose(fd, 0, 0, 0);
         if (RetVal < 0)
         {
-            //UART_PRINT("Error closing the file : %s\n\r", FS_MODE);
+            UART_PRINT("Error closing the file : %s\n\r", FS_MODE);
         }
         else
         {
@@ -686,7 +686,7 @@ int st_readFileMode()
     fd = sl_FsOpen(FS_MODE, SL_FS_READ, 0);
     if (fd < 0)
     {
-        //UART_PRINT("\r\nError opening the file : %s\n\r", FS_MODE);
+        UART_PRINT("\r\nError opening the file : %s\n\r", FS_MODE);
     }
     else
     {
@@ -703,19 +703,19 @@ int st_readFileMode()
         }
         if(RetVal < 0)
         {// Error
-            //UART_PRINT("sl_FsRead error: %d\n\r", RetVal);
+            UART_PRINT("sl_FsRead error: %d\n\r", RetVal);
             return RetVal;
         }
         offset += strlen(buffer);
         }
 
     }
-    //UART_PRINT("READING MODE: %d \n\r", atoi(&buffer));
+    UART_PRINT("READING MODE: %d \n\r", atoi(&buffer));
 
     RetVal = sl_FsClose(fd, 0, 0, 0);
     if (RetVal < 0)
     {
-        //UART_PRINT("Error closing the file : %s\n\r", FS_MODE);
+        UART_PRINT("Error closing the file : %s\n\r", FS_MODE);
     }
     else
     {
@@ -739,10 +739,11 @@ int writeWakeUp(uint16_t WakeUpInterval)
     sprintf(&wakeup,"%d",WakeUpInterval );
 
 
+    UART_PRINT("ENTRO EN WRITE\n\r");
     fd = sl_FsOpen(FS_WAKEUP, SL_FS_OVERWRITE, 0);
     if (fd < 0)
     {
-        //UART_PRINT("Error opening the file : %s\n\r", FS_WAKEUP);
+        UART_PRINT("Error opening the file : %s\n\r", FS_WAKEUP);
     }
     else
     {
@@ -751,15 +752,15 @@ int writeWakeUp(uint16_t WakeUpInterval)
         RetVal = sl_FsWrite(fd, 0, wakeup, strlen(wakeup));
         if (RetVal <= 0)
         {
-            //UART_PRINT("Writing error:  %d\n\r" ,RetVal);
+            UART_PRINT("Writing error:  %d\n\r" ,RetVal);
             return RetVal;
         }
-        //UART_PRINT("WRITING WAKEUPINTERVAL: %s\n\r", wakeup);
+        UART_PRINT("WRITING WAKEUPINTERVAL: %s\n\r", wakeup);
 
         RetVal = sl_FsClose(fd, 0, 0, 0);
         if (RetVal < 0)
         {
-            //UART_PRINT("Error closing the file : %s\n\r", FS_WAKEUP);
+            UART_PRINT("Error closing the file : %s\n\r", FS_WAKEUP);
         }
         else
         {
@@ -779,7 +780,7 @@ int st_readFileWakeUp()
     fd = sl_FsOpen(FS_WAKEUP, SL_FS_READ, 0);
     if (fd < 0)
     {
-        //UART_PRINT("\r\nError opening the file : %s\n\r", FS_WAKEUP);
+        UART_PRINT("\r\nError opening the file : %s\n\r", FS_WAKEUP);
     }
     else
     {
@@ -796,19 +797,19 @@ int st_readFileWakeUp()
         }
         if(RetVal < 0)
         {// Error
-            //UART_PRINT("sl_FsRead error: %d\n\r", RetVal);
+            UART_PRINT("sl_FsRead error: %d\n\r", RetVal);
             return RetVal;
         }
         offset += strlen(buffer);
         }
 
     }
-    //UART_PRINT("READING WAKEUPINTERVAL: %d \n\r", atoi(&buffer));
+    UART_PRINT("READING WAKEUPINTERVAL: %d \n\r", atoi(&buffer));
 
     RetVal = sl_FsClose(fd, 0, 0, 0);
     if (RetVal < 0)
     {
-        //UART_PRINT("Error closing the file : %s\n\r", FS_WAKEUP);
+        UART_PRINT("Error closing the file : %s\n\r", FS_WAKEUP);
     }
     else
     {
@@ -818,6 +819,374 @@ int st_readFileWakeUp()
     return (atoi(&buffer));
 }
 
+//////////////////////////////////////////////
+/* Escribir y leer en archivo payload*/
+//////////////////////////////////////////////
+int writePayload(uint16_t Payload)
+{
+
+    int RetVal = 0;
+    _i32 offset = 0;
+    _i32 fd;
+    unsigned char payload[32];
+
+    sprintf(&payload,"%d",Payload );
+
+
+    fd = sl_FsOpen(FS_PAYLOAD, SL_FS_OVERWRITE, 0);
+    if (fd < 0)
+    {
+        UART_PRINT("Error opening the file : %s\n\r", FS_PAYLOAD);
+    }
+    else
+    {
+//        //UART_PRINT("file opened: %s\n\r", FS_PAYLOAD);
+
+        RetVal = sl_FsWrite(fd, 0, payload, strlen(payload));
+        if (RetVal <= 0)
+        {
+            UART_PRINT("Writing error:  %d\n\r" ,RetVal);
+            return RetVal;
+        }
+        UART_PRINT("WRITING payload: %s\n\r", payload);
+
+        RetVal = sl_FsClose(fd, 0, 0, 0);
+        if (RetVal < 0)
+        {
+            UART_PRINT("Error closing the file : %s\n\r", FS_PAYLOAD);
+        }
+        else
+        {
+//            //UART_PRINT("File closed : %s\n\r", FS_PAYLOAD);
+        }
+    }
+    return offset;
+}
+
+int st_readFilePayload()
+{
+    int offset = 0;
+    int RetVal = 0;
+    _i8 buffer[MAX_FILE_SIZE];
+    int32_t fd;
+
+    fd = sl_FsOpen(FS_PAYLOAD, SL_FS_READ, 0);
+    if (fd < 0)
+    {
+        UART_PRINT("\r\nError opening the file : %s\n\r", FS_PAYLOAD);
+    }
+    else
+    {
+//        //UART_PRINT("\r\nfile opened for read: %s\n\r", FS_PAYLOAD);
+    }
+
+    while(RetVal=sl_FsRead(fd, offset, &buffer[0], MAX_FILE_SIZE)>1)
+    {
+        if(strlen(buffer)!=0)
+            {
+        if(RetVal == SL_ERROR_FS_OFFSET_OUT_OF_RANGE)
+        {// EOF
+            break;
+        }
+        if(RetVal < 0)
+        {// Error
+            UART_PRINT("sl_FsRead error: %d\n\r", RetVal);
+            return RetVal;
+        }
+        offset += strlen(buffer);
+        }
+
+    }
+    UART_PRINT("READING payload: %d \n\r", atoi(&buffer));
+
+    RetVal = sl_FsClose(fd, 0, 0, 0);
+    if (RetVal < 0)
+    {
+        UART_PRINT("Error closing the file : %s\n\r", FS_PAYLOAD);
+    }
+    else
+    {
+//        //UART_PRINT("File closed for read: %s\n\r", FS_PAYLOAD);
+    }
+
+    return (atoi(&buffer));
+}
+//////////////////////////////////////////////
+/* Escribir y leer en archivo TURNS*/
+//////////////////////////////////////////////
+int writeCycles(uint16_t Cycles)
+{
+
+    int RetVal = 0;
+    _i32 offset = 0;
+    _i32 fd;
+    unsigned char cycles[32];
+
+    sprintf(&cycles,"%d",Cycles );
+
+
+    fd = sl_FsOpen(FS_CYCLES, SL_FS_OVERWRITE, 0);
+    if (fd < 0)
+    {
+        UART_PRINT("Error opening the file : %s\n\r", FS_CYCLES);
+    }
+    else
+    {
+//        //UART_PRINT("file opened: %s\n\r", FS_CYCLES);
+
+        RetVal = sl_FsWrite(fd, 0, cycles, strlen(cycles));
+        if (RetVal <= 0)
+        {
+            UART_PRINT("Writing error:  %d\n\r" ,RetVal);
+            return RetVal;
+        }
+        UART_PRINT("WRITING CYCLES: %s\n\r", cycles);
+
+        RetVal = sl_FsClose(fd, 0, 0, 0);
+        if (RetVal < 0)
+        {
+            UART_PRINT("Error closing the file : %s\n\r", FS_CYCLES);
+        }
+        else
+        {
+//            //UART_PRINT("File closed : %s\n\r", FS_TURNS);
+        }
+    }
+    return offset;
+}
+
+int st_readFileCycles()
+{
+    int offset = 0;
+    int RetVal = 0;
+    _i8 buffer[MAX_FILE_SIZE];
+    int32_t fd;
+
+    fd = sl_FsOpen(FS_CYCLES, SL_FS_READ, 0);
+    if (fd < 0)
+    {
+        UART_PRINT("\r\nError opening the file : %s\n\r", FS_CYCLES);
+    }
+    else
+    {
+//        //UART_PRINT("\r\nfile opened for read: %s\n\r", FS_CYCLES);
+    }
+
+    while(RetVal=sl_FsRead(fd, offset, &buffer[0], MAX_FILE_SIZE)>1)
+    {
+        if(strlen(buffer)!=0)
+            {
+        if(RetVal == SL_ERROR_FS_OFFSET_OUT_OF_RANGE)
+        {// EOF
+            break;
+        }
+        if(RetVal < 0)
+        {// Error
+            UART_PRINT("sl_FsRead error: %d\n\r", RetVal);
+            return RetVal;
+        }
+        offset += strlen(buffer);
+        }
+
+    }
+    UART_PRINT("READING CYCLES: %d \n\r", atoi(&buffer));
+
+    RetVal = sl_FsClose(fd, 0, 0, 0);
+    if (RetVal < 0)
+    {
+        UART_PRINT("Error closing the file : %s\n\r", FS_CYCLES);
+    }
+    else
+    {
+//        //UART_PRINT("File closed for read: %s\n\r", FS_CYCLES);
+    }
+
+    return (atoi(&buffer));
+}
+//////////////////////////////////////////////
+/* Escribir y leer en archivo TURNS*/
+//////////////////////////////////////////////
+int writeCount(uint16_t Count)
+{
+
+    int RetVal = 0;
+    _i32 offset = 0;
+    _i32 fd;
+    unsigned char count[32];
+
+    sprintf(&count,"%d",Count );
+
+
+    fd = sl_FsOpen(FS_COUNT, SL_FS_OVERWRITE, 0);
+    if (fd < 0)
+    {
+        UART_PRINT("Error opening the file : %s\n\r", FS_COUNT);
+    }
+    else
+    {
+//        //UART_PRINT("file opened: %s\n\r", FS_COUNT);
+
+        RetVal = sl_FsWrite(fd, 0, count, strlen(count));
+        if (RetVal <= 0)
+        {
+            UART_PRINT("Writing error:  %d\n\r" ,RetVal);
+            return RetVal;
+        }
+        UART_PRINT("WRITING COUNT: %s\n\r", count);
+
+        RetVal = sl_FsClose(fd, 0, 0, 0);
+        if (RetVal < 0)
+        {
+            UART_PRINT("Error closing the file : %s\n\r", FS_COUNT);
+        }
+        else
+        {
+//            //UART_PRINT("File closed : %s\n\r", FS_TURNS);
+        }
+    }
+    return offset;
+}
+
+int st_readFileCount()
+{
+    int offset = 0;
+    int RetVal = 0;
+    _i8 buffer[MAX_FILE_SIZE];
+    int32_t fd;
+
+    fd = sl_FsOpen(FS_COUNT, SL_FS_READ, 0);
+    if (fd < 0)
+    {
+        UART_PRINT("\r\nError opening the file : %s\n\r", FS_COUNT);
+    }
+    else
+    {
+//        //UART_PRINT("\r\nfile opened for read: %s\n\r", FS_COUNT);
+    }
+
+    while(RetVal=sl_FsRead(fd, offset, &buffer[0], MAX_FILE_SIZE)>1)
+    {
+        if(strlen(buffer)!=0)
+            {
+        if(RetVal == SL_ERROR_FS_OFFSET_OUT_OF_RANGE)
+        {// EOF
+            break;
+        }
+        if(RetVal < 0)
+        {// Error
+            UART_PRINT("sl_FsRead error: %d\n\r", RetVal);
+            return RetVal;
+        }
+        offset += strlen(buffer);
+        }
+
+    }
+    UART_PRINT("READING count: %d \n\r", atoi(&buffer));
+
+    RetVal = sl_FsClose(fd, 0, 0, 0);
+    if (RetVal < 0)
+    {
+        UART_PRINT("Error closing the file : %s\n\r", FS_COUNT);
+    }
+    else
+    {
+//        //UART_PRINT("File closed for read: %s\n\r", FS_COUNT);
+    }
+
+    return (atoi(&buffer));
+}
+//////////////////////////////////////////////
+/* Escribir y leer en archivo TURNS*/
+//////////////////////////////////////////////
+int writeIter(uint16_t Iter)
+{
+
+    int RetVal = 0;
+    _i32 offset = 0;
+    _i32 fd;
+    unsigned char iter[32];
+
+    sprintf(&iter,"%d",Iter );
+
+
+    fd = sl_FsOpen(FS_ITER, SL_FS_OVERWRITE, 0);
+    if (fd < 0)
+    {
+        UART_PRINT("Error opening the file : %s\n\r", FS_ITER);
+    }
+    else
+    {
+//        //UART_PRINT("file opened: %s\n\r", FS_ITER);
+
+        RetVal = sl_FsWrite(fd, 0, iter, strlen(iter));
+        if (RetVal <= 0)
+        {
+            UART_PRINT("Writing error:  %d\n\r" ,RetVal);
+            return RetVal;
+        }
+        UART_PRINT("WRITING iter: %s\n\r", iter);
+
+        RetVal = sl_FsClose(fd, 0, 0, 0);
+        if (RetVal < 0)
+        {
+            UART_PRINT("Error closing the file : %s\n\r", FS_ITER);
+        }
+        else
+        {
+//            //UART_PRINT("File closed : %s\n\r", FS_ITER);
+        }
+    }
+    return offset;
+}
+
+int st_readFileIter()
+{
+    int offset = 0;
+    int RetVal = 0;
+    _i8 buffer[MAX_FILE_SIZE];
+    int32_t fd;
+
+    fd = sl_FsOpen(FS_ITER, SL_FS_READ, 0);
+    if (fd < 0)
+    {
+        UART_PRINT("\r\nError opening the file : %s\n\r", FS_ITER);
+    }
+    else
+    {
+//        //UART_PRINT("\r\nfile opened for read: %s\n\r", FS_ITER);
+    }
+
+    while(RetVal=sl_FsRead(fd, offset, &buffer[0], MAX_FILE_SIZE)>1)
+    {
+        if(strlen(buffer)!=0)
+            {
+        if(RetVal == SL_ERROR_FS_OFFSET_OUT_OF_RANGE)
+        {// EOF
+            break;
+        }
+        if(RetVal < 0)
+        {// Error
+            UART_PRINT("sl_FsRead error: %d\n\r", RetVal);
+            return RetVal;
+        }
+        offset += strlen(buffer);
+        }
+
+    }
+    UART_PRINT("READING iter: %d \n\r", atoi(&buffer));
+
+    RetVal = sl_FsClose(fd, 0, 0, 0);
+    if (RetVal < 0)
+    {
+        UART_PRINT("Error closing the file : %s\n\r", FS_ITER);
+    }
+    else
+    {
+//        //UART_PRINT("File closed for read: %s\n\r", FS_ITER);
+    }
+
+    return (atoi(&buffer));
+}
 //////////////////////////////////////////////
 /* Escribir y leer en archivo NODEID*/
 //////////////////////////////////////////////
@@ -835,7 +1204,7 @@ int writeNodeId(uint16_t NodeId)
     fd = sl_FsOpen(FS_NODEID, SL_FS_OVERWRITE, 0);
     if (fd < 0)
     {
-        //UART_PRINT("Error opening the file : %s\n\r", FS_NODEID);
+        UART_PRINT("Error opening the file : %s\n\r", FS_NODEID);
     }
     else
     {
@@ -844,15 +1213,15 @@ int writeNodeId(uint16_t NodeId)
         RetVal = sl_FsWrite(fd, 0, nodeid, strlen(nodeid));
         if (RetVal <= 0)
         {
-            //UART_PRINT("Writing error:  %d\n\r" ,RetVal);
+            UART_PRINT("Writing error:  %d\n\r" ,RetVal);
             return RetVal;
         }
-        //UART_PRINT("WRITING NodeId: %s\n\r", nodeid);
+        UART_PRINT("WRITING NodeId: %s\n\r", nodeid);
 
         RetVal = sl_FsClose(fd, 0, 0, 0);
         if (RetVal < 0)
         {
-            //UART_PRINT("Error closing the file : %s\n\r", FS_NODEID);
+            UART_PRINT("Error closing the file : %s\n\r", FS_NODEID);
         }
         else
         {
@@ -872,7 +1241,7 @@ int st_readFileNodeId()
     fd = sl_FsOpen(FS_NODEID, SL_FS_READ, 0);
     if (fd < 0)
     {
-        //UART_PRINT("\r\nError opening the file : %s\n\r", FS_NODEID);
+        UART_PRINT("\r\nError opening the file : %s\n\r", FS_NODEID);
     }
     else
     {
@@ -889,19 +1258,19 @@ int st_readFileNodeId()
         }
         if(RetVal < 0)
         {// Error
-            //UART_PRINT("sl_FsRead error: %d\n\r", RetVal);
+            UART_PRINT("sl_FsRead error: %d\n\r", RetVal);
             return RetVal;
         }
         offset += strlen(buffer);
         }
 
     }
-    //UART_PRINT("READING NODEID: %d \n\r", atoi(&buffer));
+    UART_PRINT("READING NODEID: %d \n\r", atoi(&buffer));
 
     RetVal = sl_FsClose(fd, 0, 0, 0);
     if (RetVal < 0)
     {
-        //UART_PRINT("Error closing the file : %s\n\r", FS_NODEID);
+        UART_PRINT("Error closing the file : %s\n\r", FS_NODEID);
     }
     else
     {
@@ -928,7 +1297,7 @@ int writeSSID(unsigned char *SSID)
     fd = sl_FsOpen(FS_SSID, SL_FS_OVERWRITE, 0);
     if (fd < 0)
     {
-        //UART_PRINT("Error opening the file : %s\n\r", FS_SSID);
+        UART_PRINT("Error opening the file : %s\n\r", FS_SSID);
     }
     else
     {
@@ -937,15 +1306,15 @@ int writeSSID(unsigned char *SSID)
         RetVal = sl_FsWrite(fd, 0, ssid, strlen(ssid));
         if (RetVal <= 0)
         {
-            //UART_PRINT("Writing error:  %d\n\r" ,RetVal);
+            UART_PRINT("Writing error:  %d\n\r" ,RetVal);
             return RetVal;
         }
-        //UART_PRINT("WRITING SSID: %s\n\r", ssid);
+        UART_PRINT("WRITING SSID: %s\n\r", ssid);
 
         RetVal = sl_FsClose(fd, 0, 0, 0);
         if (RetVal < 0)
         {
-            //UART_PRINT("Error closing the file : %s\n\r", FS_SSID);
+            UART_PRINT("Error closing the file : %s\n\r", FS_SSID);
         }
         else
         {
@@ -978,7 +1347,7 @@ int st_readFileSSID(unsigned char *ssid)
         return RetVal;
     }
 
-    //UART_PRINT("READING SSID: %s \n\r", ssid);
+    UART_PRINT("READING SSID: %s \n\r", ssid);
 
     RetVal = sl_FsClose(fd, 0, 0, 0);
     if (RetVal < 0) {

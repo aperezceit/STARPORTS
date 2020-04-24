@@ -31,6 +31,8 @@
 #define SUCCESS_SET_NWSKEY         0
 #define ERROR_SET_NWSKEY           1
 
+#define SUCCESS_SET_PWRIDX         0
+#define ERROR_SET_PWRIDX           1
 
 #define SUCCESS_OTAA_LORA           0
 #define ERROR_OTAA_DEVEUI           1
@@ -74,7 +76,7 @@ struct LoraNode {
     unsigned char AppKey[32];
     unsigned char NwksKey[32];
     unsigned char AppsKey[32];
-    unsigned char DataTx[128];
+    unsigned char DataTx[512];
     uint8_t DataLenTx;
     uint8_t PortNoTx;
     unsigned char DataRx[4];

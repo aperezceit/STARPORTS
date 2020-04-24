@@ -122,7 +122,7 @@ void SimpleLinkNetAppEventHandler(SlNetAppEvent_t *pNetAppEvent)
         case SL_NETAPP_EVENT_IPV4_ACQUIRED:
         {
             SET_STATUS_BIT(PowerMeasure_CB.slStatus, STATUS_BIT_IP_ACQUIRED);
-            UART_PRINT("[NETAPP EVENT] IP Acquired: IP=%d.%d.%d.%d , "
+        /*    UART_PRINT("[NETAPP EVENT] IP Acquired: IP=%d.%d.%d.%d , "
             "Gateway=%d.%d.%d.%d\n\r",
             SL_IPV4_BYTE(pNetAppEvent->Data.IpAcquiredV4.Ip,3),
             SL_IPV4_BYTE(pNetAppEvent->Data.IpAcquiredV4.Ip,2),
@@ -131,7 +131,7 @@ void SimpleLinkNetAppEventHandler(SlNetAppEvent_t *pNetAppEvent)
             SL_IPV4_BYTE(pNetAppEvent->Data.IpAcquiredV4.Gateway,3),
             SL_IPV4_BYTE(pNetAppEvent->Data.IpAcquiredV4.Gateway,2),
             SL_IPV4_BYTE(pNetAppEvent->Data.IpAcquiredV4.Gateway,1),
-            SL_IPV4_BYTE(pNetAppEvent->Data.IpAcquiredV4.Gateway,0));
+            SL_IPV4_BYTE(pNetAppEvent->Data.IpAcquiredV4.Gateway,0));*/
         }
         break;
 
@@ -222,17 +222,28 @@ int32_t wlanConnectFromFile(unsigned char *ssid)
     sprintf(&FileSSID,"%s",ssid );
 
     /* WLAN CONNECT TO AP*/
-    ret = sl_WlanConnect((signed char*)FileSSID, strlen(FileSSID), 0, &secParams, 0);
-    UART_PRINT("Trying to connect to AP : %s\n\r", FileSSID);
+    ret = sl_WlanConnect((signed char*)SSID_NAME, strlen(SSID_NAME), 0, &secParams, 0);
+    UART_PRINT("Trying to connect to AP : %s\n\r", SSID_NAME);
 
     sl_Task(NULL);
 
+    int tries=0;
     while((!IS_CONNECTED(PowerMeasure_CB.slStatus)) || (!IS_IP_ACQUIRED(PowerMeasure_CB.slStatus)))
     {
         sl_Task(NULL);
+
+        if((!IS_CONNECTED(PowerMeasure_CB.slStatus)) || (!IS_IP_ACQUIRED(PowerMeasure_CB.slStatus))){
+            tries ++;
+            UART_PRINT(".");
+        }
+        if(tries==20000){
+            Node_Disable();
+            return ERROR_CONNECT_WIFI;
+        }
     }
 
     if (ret!=0){
+        Node_Disable();
         return ERROR_CONNECT_WIFI;
     }else{
         return SUCCESS_CONNECT_WIFI;

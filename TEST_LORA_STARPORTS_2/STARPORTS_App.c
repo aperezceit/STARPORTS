@@ -82,7 +82,7 @@ uint8_t Timer0Event = 0;
 uint8_t Timer1Event = 0;
 uint8_t LPDSOut = 0;
 
-struct Node MyNode = {NODEID,1200,MODE_NORMAL_LORA,16,"Movistar_361D"};
+struct Node MyNode = {NODEID,1200,MODE_NORMAL_LORA,16,"PORTS2"};
 struct TMP006_Data MyTMP006 = {TMP006_ID};
 struct ADXL355_Data MyADXL = {ADXL355_ID,500,256};
 struct BME280_Data MyBME = {BME280_ID};
@@ -136,11 +136,12 @@ void *mainThread(void *arg0)
     GPIO_setConfig(Board_EN_NODE, GPIO_CFG_OUT_STD | GPIO_CFG_OUT_HIGH);
     Node_Enable();
 
+    Watchdog_init();
     // Configure the rest of GPIO pins
     ret = GPIO_Config();
 
     /* Open a Watchdog driver instance */
-    // wd = Startup_Watchdog(Board_WATCHDOG0, TIMEOUT_MS);
+    wd = Startup_Watchdog(Board_WATCHDOG0, TIMEOUT_MS);
 
     /************ Begin Read Configuration Files **************************/
     // Muestra estado memoria y lista de archivos
@@ -158,7 +159,7 @@ void *mainThread(void *arg0)
     /* Get Param Values from internal filesystem */
     MyLoraNode.PortNoTx = 1;
     // Get MyNodeId
-    MyNode.NodeId = st_readFileNodeId();
+    //MyNode.NodeId = st_readFileNodeId();
     // Get MyNode.WakeUpInterval --> Read WakeUp_Time File
     MyNode.WakeUpInterval = st_readFileWakeUp();
     // Get MyNode.Mode --> Read File Mode
@@ -167,11 +168,16 @@ void *mainThread(void *arg0)
     MyNode.NCycles = st_readFileNCycles();
     // Get MyNode.SSID[] --> Read SSID File
     //writeSSID(MyNode.SSID);
-    st_readFileSSID(&(MyNode.SSID));
+    //st_readFileSSID(&(MyNode.SSID));
     // Get MyNode.FirstBoot --> Read FirstBoot File: Yes (1) No (0)
     MyNode.NBoot = st_readFileNBoot();
     // Get MyNode.NFails --> Number of failed attempts to Wireless Connection
-    MyNode.NFails = 0; // st_readFileNFails();
+    MyNode.NFails = 0   ;// st_readFileNFails();
+
+    MyNode.Payload = st_readFilePayload();
+    MyNode.Cycles = st_readFileCycles();
+    MyNode.Iter = st_readFileIter();
+    MyNode.Count = st_readFileCount();
     /************ Ends Reading Configuration Files **************************/
 
     if (MyNode.NFails>=4) {
@@ -190,7 +196,6 @@ void *mainThread(void *arg0)
     /************* Begin Configure Peripherals ***********************/
     // Reset the RN2483
     RN2483_Clear();
-
     // I2C interface started
     i2c = Startup_I2C(Board_I2C0);
     // Configures the RTC
@@ -213,43 +218,13 @@ void *mainThread(void *arg0)
         if (sz==0) {
           // Buffer size is too large
         }
-
-        //        if (MyNode.FirstBoot==TRUE) {
-        //            // Join OTAA
-        //            ret = Join_Otaa_Lora(uart1);
-        //            NextStep = SHUTDOWN;
-        //            if (ret==SUCCESS_OTAA_LORA) {
-        //                // Get devaddr from RN2483 & Write to file
-        //                ret = Mac_Get_Devaddr(uart1, &MyLoraNode);
-        //                ret = Mac_Set_Devaddr(uart1, &MyLoraNode);
-        //                // Get upctr from RN2483 & Write to file
-        //                MyLoraNode.Upctr = Mac_Get_Upctr(uart1);
-        //                writeUpCntr(MyLoraNode.Upctr);
-        //                ret = Mac_Save(uart1);
-        //                // MyNode.FirstBoot = FALSE; // Write FirstBoot file
-        //                // writeFirstBoot(MyNode.FirstBoot);
-        //                MyNode.NFails=0; // and write to file NFails
-        //                writeNFails(MyNode.NFails);
-        //            } else {
-        //                strcpy(Mess,"Join_Otaa_Lora() Failed ");
-        //                UART_write(uart0, Mess, 24);
-        //                Mess[0] = '('; Mess[1] = ret+48; Mess[2]=')';
-        //                UART_write(uart0, Mess,3);
-        //                UART_write(uart0, "\r\n",2);
-        //                MyNode.NFails++; // Write NFails File
-        //                writeNFails(MyNode.NFails);
-        //            }
-        //
-        //        } else {
-
         // Read upctr from file
         MyLoraNode.Upctr = st_readFileUpCntr();
-        UART_PRINT("Upctr : %d\r\n", MyLoraNode.Upctr);
         Mac_Set_Upctr(uart1,&MyLoraNode);
         MyLoraNode.Dnctr = st_readFileDnCntr();
         Mac_Set_Dnctr(uart1,&MyLoraNode);
         // Set adaptive datarate ON
-        Mac_Adr_On(uart1);
+        //Mac_Adr_On(uart1);
         // Set Automatic Retransmit ON
         Mac_Ar_On(uart1);
 
@@ -268,14 +243,11 @@ void *mainThread(void *arg0)
             writeNFails(MyNode.NFails);
             NextStep=SHUTDOWN;
         }
-        // Comentado para poder usar los sensores
-        // MyNode.NFails++;   // Write NFails File
-        // writeNFails(MyNode.NFails);
-        // NextStep=SHUTDOWN;
+
     } else if (MyNode.Mode==MODE_NORMAL_WIFI) {
-        // UART_PRINT("MODE_NORMAL_WIFI\n\r");
+            UART_PRINT("MODE_NORMAL_WIFI\n\r");
         // if (MyNode.FirstBoot==TRUE) {
-            st_readFileSSID(&(MyNode.SSID));    // Read SSID from file
+            //st_readFileSSID(&(MyNode.SSID));    // Read SSID from file
             // Read other params ...
             usleep(2000);
             ret = wlanConf();    // Setup WiFi
@@ -287,25 +259,14 @@ void *mainThread(void *arg0)
                 // writeFirstBoot(MyNode.FirstBoot);
                 MyNode.NFails=0; // and write to file NFails
                 writeNFails(MyNode.NFails);
+                UART_PRINT("SUCCESS WIFI CONNECTION\n\r");
             } else {
                 MyNode.NFails++;
                 writeNFails(MyNode.NFails);
+                UART_PRINT("ERROR CONNECTING WIFI\n\r");
                 NextStep=SHUTDOWN;
             }
-        // } else {
-            // Read SSID from file
-            // Read other params ...
-            // Setup WiFi
-            // Connect WiFi
-        //    if (ret==SUCCESS_CONNECT_WIFI) {
-        //        MyNode.NFails=0; // and write to file NFails
-                // Continue reading sensors
-        //    } else {
-         //       MyNode.NFails++;
-                // Write NFails File
-          //      NextStep=SHUTDOWN;
-           // }
-        // }
+
     }
     /************** End of Configuration and Setup Wireless Connectivity ***************/
 
@@ -338,26 +299,289 @@ void *mainThread(void *arg0)
 
     MyLoraNode.DataLenTx = Uint8Array2Char(DataPacket, DataPacketLen, &(MyLoraNode.DataTx));
 
+    /*
+     * test paper
+     */
+
+    memset(MyLoraNode.DataTx,'/0', strlen(MyLoraNode.DataTx));
+    UART_write(uart0, &(MyLoraNode.DataTx),MyLoraNode.DataLenTx);
+    UART_write(uart0, "\r\n", 2);
+
+    if(MyNode.Payload==0){
+        UART_PRINT("PAY 0\r\n");
+        strcpy(MyLoraNode.DataTx,PAYLOAD_0);
+        MyLoraNode.DataLenTx = strlen(MyLoraNode.DataTx);
+        UART_write(uart0, &(MyLoraNode.DataTx),MyLoraNode.DataLenTx);
+        UART_write(uart0, "\r\n", 2);
+
+    }else if(MyNode.Payload==1){
+        UART_PRINT("PAY 1\r\n");
+        strcpy(MyLoraNode.DataTx,PAYLOAD_1);
+        MyLoraNode.DataLenTx = strlen(MyLoraNode.DataTx);
+        UART_write(uart0, &(MyLoraNode.DataTx),MyLoraNode.DataLenTx);
+        UART_write(uart0, "\r\n", 2);
+
+    }else if(MyNode.Payload==2){
+        UART_PRINT("PAY 2\r\n");
+        strcpy(MyLoraNode.DataTx,PAYLOAD_2);
+        MyLoraNode.DataLenTx = strlen(MyLoraNode.DataTx);
+        UART_write(uart0, &(MyLoraNode.DataTx),MyLoraNode.DataLenTx);
+        UART_write(uart0, "\r\n", 2);
+
+    }else if(MyNode.Payload==3){
+        UART_PRINT("PAY 3\r\n");
+        strcpy(MyLoraNode.DataTx,PAYLOAD_3);
+        MyLoraNode.DataLenTx = strlen(MyLoraNode.DataTx);
+        UART_write(uart0, &(MyLoraNode.DataTx),MyLoraNode.DataLenTx);
+        UART_write(uart0, "\r\n", 2);
+
+    }else if(MyNode.Payload==4){
+        UART_PRINT("PAY 4\r\n");
+        strcpy(MyLoraNode.DataTx,PAYLOAD_4);
+        MyLoraNode.DataLenTx = strlen(MyLoraNode.DataTx);
+        UART_write(uart0, &(MyLoraNode.DataTx),MyLoraNode.DataLenTx);
+        UART_write(uart0, "\r\n", 2);
+
+    }else if(MyNode.Payload==5){
+        UART_PRINT("PAY 5\r\n");
+        strcpy(MyLoraNode.DataTx,PAYLOAD_5);
+        MyLoraNode.DataLenTx = strlen(MyLoraNode.DataTx);
+        UART_write(uart0, &(MyLoraNode.DataTx),MyLoraNode.DataLenTx);
+        UART_write(uart0, "\r\n", 2);
+
+    }else if(MyNode.Payload==6){
+        UART_PRINT("PAY 6\r\n");
+        strcpy(MyLoraNode.DataTx,PAYLOAD_6);
+        MyLoraNode.DataLenTx = strlen(MyLoraNode.DataTx);
+        UART_write(uart0, &(MyLoraNode.DataTx),MyLoraNode.DataLenTx);
+        UART_write(uart0, "\r\n", 2);
+
+    }else if(MyNode.Payload==7){
+        UART_PRINT("PAY 7\r\n");
+        strcpy(MyLoraNode.DataTx,PAYLOAD_7);
+        MyLoraNode.DataLenTx = strlen(MyLoraNode.DataTx);
+        UART_write(uart0, &(MyLoraNode.DataTx),MyLoraNode.DataLenTx);
+        UART_write(uart0, "\r\n", 2);
+
+    }else if(MyNode.Payload==8){
+        UART_PRINT("PAY 8\r\n");
+        strcpy(MyLoraNode.DataTx,PAYLOAD_8);
+        MyLoraNode.DataLenTx = strlen(MyLoraNode.DataTx);
+        UART_write(uart0, &(MyLoraNode.DataTx),MyLoraNode.DataLenTx);
+        UART_write(uart0, "\r\n", 2);
+
+    }else if(MyNode.Payload==9){
+        UART_PRINT("PAY 9\r\n");
+        strcpy(MyLoraNode.DataTx,PAYLOAD_9);
+        MyLoraNode.DataLenTx = strlen(MyLoraNode.DataTx);
+        UART_write(uart0, &(MyLoraNode.DataTx),MyLoraNode.DataLenTx);
+        UART_write(uart0, "\r\n", 2);
+
+    }else if(MyNode.Payload==10 && MyNode.Iter==0){
+        UART_PRINT("PAY 10\r\n");
+        if(MyNode.Count < MyNode.Cycles){
+            strcpy(MyLoraNode.DataTx,PAYLOAD_0);
+            MyLoraNode.DataLenTx = strlen(MyLoraNode.DataTx);
+            UART_write(uart0, &(MyLoraNode.DataTx),MyLoraNode.DataLenTx);
+            UART_write(uart0, "\r\n", 2);
+            MyNode.Count ++;
+            writeCount(MyNode.Count);
+        }else{
+            strcpy(MyLoraNode.DataTx,PAYLOAD_0);
+            MyLoraNode.DataLenTx = strlen(MyLoraNode.DataTx);
+            UART_write(uart0, &(MyLoraNode.DataTx),MyLoraNode.DataLenTx);
+            UART_write(uart0, "\r\n", 2);
+            MyNode.Count = 0;
+            writeCount(MyNode.Count);
+            MyNode.Iter ++;
+            writeIter(MyNode.Iter);
+        }
+    }else if(MyNode.Payload==10 && MyNode.Iter==1){
+        if(MyNode.Count < MyNode.Cycles){
+            strcpy(MyLoraNode.DataTx,PAYLOAD_1);
+            MyLoraNode.DataLenTx = strlen(MyLoraNode.DataTx);
+            UART_write(uart0, &(MyLoraNode.DataTx),MyLoraNode.DataLenTx);
+            UART_write(uart0, "\r\n", 2);
+            MyNode.Count ++;
+            writeCount(MyNode.Count);
+        }else{
+            strcpy(MyLoraNode.DataTx,PAYLOAD_1);
+            MyLoraNode.DataLenTx = strlen(MyLoraNode.DataTx);
+            UART_write(uart0, &(MyLoraNode.DataTx),MyLoraNode.DataLenTx);
+            UART_write(uart0, "\r\n", 2);
+            MyNode.Count = 0;
+            writeCount(MyNode.Count);
+            MyNode.Iter ++;
+            writeIter(MyNode.Iter);
+        }
+    }else if(MyNode.Payload==10 && MyNode.Iter==2){
+        if(MyNode.Count < MyNode.Cycles){
+            strcpy(MyLoraNode.DataTx,PAYLOAD_2);
+            MyLoraNode.DataLenTx = strlen(MyLoraNode.DataTx);
+            UART_write(uart0, &(MyLoraNode.DataTx),MyLoraNode.DataLenTx);
+            UART_write(uart0, "\r\n", 2);
+            MyNode.Count ++;
+            writeCount(MyNode.Count);
+        }else{
+            strcpy(MyLoraNode.DataTx,PAYLOAD_2);
+            MyLoraNode.DataLenTx = strlen(MyLoraNode.DataTx);
+            UART_write(uart0, &(MyLoraNode.DataTx),MyLoraNode.DataLenTx);
+            UART_write(uart0, "\r\n", 2);
+            MyNode.Count = 0;
+            writeCount(MyNode.Count);
+            MyNode.Iter ++;
+            writeIter(MyNode.Iter);
+        }
+    }else if(MyNode.Payload==10 && MyNode.Iter==3){
+        if(MyNode.Count < MyNode.Cycles){
+            strcpy(MyLoraNode.DataTx,PAYLOAD_3);
+            MyLoraNode.DataLenTx = strlen(MyLoraNode.DataTx);
+            UART_write(uart0, &(MyLoraNode.DataTx),MyLoraNode.DataLenTx);
+            UART_write(uart0, "\r\n", 2);
+            MyNode.Count ++;
+            writeCount(MyNode.Count);
+        }else{
+            strcpy(MyLoraNode.DataTx,PAYLOAD_3);
+            MyLoraNode.DataLenTx = strlen(MyLoraNode.DataTx);
+            UART_write(uart0, &(MyLoraNode.DataTx),MyLoraNode.DataLenTx);
+            UART_write(uart0, "\r\n", 2);
+            MyNode.Count = 0;
+            writeCount(MyNode.Count);
+            MyNode.Iter ++;
+            writeIter(MyNode.Iter);
+        }
+    }else if(MyNode.Payload==10 && MyNode.Iter==4){
+        if(MyNode.Count < MyNode.Cycles){
+            strcpy(MyLoraNode.DataTx,PAYLOAD_4);
+            MyLoraNode.DataLenTx = strlen(MyLoraNode.DataTx);
+            UART_write(uart0, &(MyLoraNode.DataTx),MyLoraNode.DataLenTx);
+            UART_write(uart0, "\r\n", 2);
+            MyNode.Count ++;
+            writeCount(MyNode.Count);
+        }else{
+            strcpy(MyLoraNode.DataTx,PAYLOAD_4);
+            MyLoraNode.DataLenTx = strlen(MyLoraNode.DataTx);
+            UART_write(uart0, &(MyLoraNode.DataTx),MyLoraNode.DataLenTx);
+            UART_write(uart0, "\r\n", 2);
+            MyNode.Count = 0;
+            writeCount(MyNode.Count);
+            MyNode.Iter ++;
+            writeIter(MyNode.Iter);
+        }
+    }else if(MyNode.Payload==10 && MyNode.Iter==5){
+        if(MyNode.Count < MyNode.Cycles){
+            strcpy(MyLoraNode.DataTx,PAYLOAD_5);
+            MyLoraNode.DataLenTx = strlen(MyLoraNode.DataTx);
+            UART_write(uart0, &(MyLoraNode.DataTx),MyLoraNode.DataLenTx);
+            UART_write(uart0, "\r\n", 2);
+            MyNode.Count ++;
+            writeCount(MyNode.Count);
+        }else{
+            strcpy(MyLoraNode.DataTx,PAYLOAD_5);
+            MyLoraNode.DataLenTx = strlen(MyLoraNode.DataTx);
+            UART_write(uart0, &(MyLoraNode.DataTx),MyLoraNode.DataLenTx);
+            UART_write(uart0, "\r\n", 2);
+            MyNode.Count = 0;
+            writeCount(MyNode.Count);
+            MyNode.Iter ++;
+            writeIter(MyNode.Iter);
+        }
+    }else if(MyNode.Payload==10 && MyNode.Iter==6){
+        if(MyNode.Count < MyNode.Cycles){
+            strcpy(MyLoraNode.DataTx,PAYLOAD_6);
+            MyLoraNode.DataLenTx = strlen(MyLoraNode.DataTx);
+            UART_write(uart0, &(MyLoraNode.DataTx),MyLoraNode.DataLenTx);
+            UART_write(uart0, "\r\n", 2);
+            MyNode.Count ++;
+            writeCount(MyNode.Count);
+        }else{
+            strcpy(MyLoraNode.DataTx,PAYLOAD_6);
+            MyLoraNode.DataLenTx = strlen(MyLoraNode.DataTx);
+            UART_write(uart0, &(MyLoraNode.DataTx),MyLoraNode.DataLenTx);
+            UART_write(uart0, "\r\n", 2);
+            MyNode.Count = 0;
+            writeCount(MyNode.Count);
+            MyNode.Iter ++;
+            writeIter(MyNode.Iter);
+        }
+    }else if(MyNode.Payload==10 && MyNode.Iter==7){
+        if(MyNode.Count < MyNode.Cycles){
+            strcpy(MyLoraNode.DataTx,PAYLOAD_7);
+            MyLoraNode.DataLenTx = strlen(MyLoraNode.DataTx);
+            UART_write(uart0, &(MyLoraNode.DataTx),MyLoraNode.DataLenTx);
+            UART_write(uart0, "\r\n", 2);
+            MyNode.Count ++;
+            writeCount(MyNode.Count);
+        }else{
+            strcpy(MyLoraNode.DataTx,PAYLOAD_7);
+            MyLoraNode.DataLenTx = strlen(MyLoraNode.DataTx);
+            UART_write(uart0, &(MyLoraNode.DataTx),MyLoraNode.DataLenTx);
+            UART_write(uart0, "\r\n", 2);
+            MyNode.Count = 0;
+            writeCount(MyNode.Count);
+            MyNode.Iter ++;
+            writeIter(MyNode.Iter);
+        }
+    }else if(MyNode.Payload==10 && MyNode.Iter==8){
+        if(MyNode.Count < MyNode.Cycles){
+            strcpy(MyLoraNode.DataTx,PAYLOAD_8);
+            MyLoraNode.DataLenTx = strlen(MyLoraNode.DataTx);
+            UART_write(uart0, &(MyLoraNode.DataTx),MyLoraNode.DataLenTx);
+            UART_write(uart0, "\r\n", 2);
+            MyNode.Count ++;
+            writeCount(MyNode.Count);
+        }else{
+            strcpy(MyLoraNode.DataTx,PAYLOAD_8);
+            MyLoraNode.DataLenTx = strlen(MyLoraNode.DataTx);
+            UART_write(uart0, &(MyLoraNode.DataTx),MyLoraNode.DataLenTx);
+            UART_write(uart0, "\r\n", 2);
+            MyNode.Count = 0;
+            writeCount(MyNode.Count);
+            MyNode.Iter ++;
+            writeIter(MyNode.Iter);
+        }
+    }else if(MyNode.Payload==10 && MyNode.Iter==9){
+        if(MyNode.Count < MyNode.Cycles){
+            strcpy(MyLoraNode.DataTx,PAYLOAD_9);
+            MyLoraNode.DataLenTx = strlen(MyLoraNode.DataTx);
+            UART_write(uart0, &(MyLoraNode.DataTx),MyLoraNode.DataLenTx);
+            UART_write(uart0, "\r\n", 2);
+            MyNode.Count ++;
+            writeCount(MyNode.Count);
+        }else{
+            strcpy(MyLoraNode.DataTx,PAYLOAD_9);
+            MyLoraNode.DataLenTx = strlen(MyLoraNode.DataTx);
+            UART_write(uart0, &(MyLoraNode.DataTx),MyLoraNode.DataLenTx);
+            UART_write(uart0, "\r\n", 2);
+            MyNode.Count = 0;
+            writeCount(MyNode.Count);
+            MyNode.Iter = 0;
+            writeIter(MyNode.Iter);
+        }
+    }
+
     UART_write(uart0, &(MyLoraNode.DataTx),MyLoraNode.DataLenTx);
     UART_write(uart0, "\r\n", 2);
 
     if (MyNode.Mode==MODE_NORMAL_LORA) {
         ret = Tx_Uncnf_Lora(uart1, &MyLoraNode, &mask, &nodeId);    // Transmit Data, several tries?
         if (ret==SUCCESS_TX_MAC_TX) {
+            //UART_PRINT("TX SUCCESS\n\r");
             // Get upctr from RN2483 & Write to file
             MyLoraNode.Upctr = Mac_Get_Upctr(uart1);
             writeUpCntr(MyLoraNode.Upctr);
             MyLoraNode.Dnctr = Mac_Get_Dnctr(uart1);
             writeDnCntr(MyLoraNode.Dnctr);
             // writeNFails(0);
-            writeNBoot(1-MyNode.NBoot);
+            //writeNBoot(1-MyNode.NBoot);
         } else if (ret == SUCCESS_TX_MAC_RX) {
+            //UART_PRINT("RX SUCCESS\n\r");
             // Get upctr from RN2483 & Write to file
             MyLoraNode.Upctr = Mac_Get_Upctr(uart1);
-            writeUpCntr(MyLoraNode.Upctr);
+            writeUpCntr(MyLoraNode.Upctr);              //*********SI HAGO ESTE WRITE MACHACO EL VALOR DE DOWNLINK PARA ESTE PARAM.
             MyLoraNode.Dnctr = Mac_Get_Dnctr(uart1);
             writeDnCntr(MyLoraNode.Dnctr);
-            if (nodeId==MyNode.NodeId) {
+       /*     if (nodeId==MyNode.NodeId) {
                 // Write New Configuration Data to Files
                 if (mask&0x01!=0) {
                     writeWakeUp(MyNode.WakeUpInterval);
@@ -375,8 +599,8 @@ void *mainThread(void *arg0)
                 if (mask&0x10!=0) {
                     writeUpCntr(MyLoraNode.Upctr);
                 }
-            }
-            writeNBoot(1-MyNode.NBoot);
+            }*/
+            //writeNBoot(1-MyNode.NBoot);
             // writeNFails(0);
         } else {
             UART_write(uart0,"Tx_Uncnf_Lora() Failed",22);
@@ -388,23 +612,37 @@ void *mainThread(void *arg0)
     }
 
     else if (MyNode.Mode==MODE_NORMAL_WIFI) {
-        // UART_PRINT("SENDING SENSOR DATA OVER MODE_NORMAL_WIFI\r\n");
-        // Transmit Data through WiFi, several tries?
-        //sendUdpClient(PORT_UDP);                      ******AÑADIR STRUCTURAS DE CONTROL EN WIFI.h
-        // if (ret==SUCCESS_WIFI_TX) {
-            // Getting Configuration Data back from AppServer
-            // Write New Configuration Data to Files
-        //    MyNode.NFails=0; // and write to file NFails
-        // } else {
-        //    MyNode.NFails++;
-        //    writeNFails(MyNode.NFails); // Write NFails File
-        // }
+        UART_PRINT("SENDING SENSOR DATA OVER MODE_NORMAL_WIFI\r\n");
+        prepareDataFrame(PORT, DEST_IP_ADDR);
+
+        sockId = sl_Socket(SL_AF_INET,SL_SOCK_DGRAM, 0);
+        if(sockId < 0){
+            UART_PRINT("error UDP %d\n\r",sockId);
+        }else{
+            //UART_PRINT("SOCKET UDP %d\n\r",sockId);
+        }
+
+        status = sl_SendTo(sockId, MyLoraNode.DataTx, MyLoraNode.DataLenTx, 0,(SlSockAddr_t *)&PowerMeasure_CB.ipV4Addr,sizeof(SlSockAddrIn_t));
+
+        if(status < 0 )
+        {
+            status = sl_Close(sockId);
+            ASSERT_ON_ERROR(sockId);
+            UART_PRINT("\n\rERROR SENDING PACKET: %s\n\r", status);
+            Node_Disable();
+        }else{
+            UART_PRINT("\n\rPACKET SENT\n\r");
+            status = sl_Close(sockId);
+            writeNBoot(1-MyNode.NBoot);
+        }
     }
+
+    writeNBoot(1-MyNode.NBoot);
 
     UART_write(uart0, "End of STARPORTS Measures\r\n", 27);
 
     UART_close(uart1);
-    // UART_close(uart0);
+    UART_close(uart0);
 
     Node_Disable();
 

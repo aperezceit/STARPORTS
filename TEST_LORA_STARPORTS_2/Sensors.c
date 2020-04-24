@@ -4,6 +4,7 @@
  *  Created on: 2 may. 2019
  *      Author: airizar
  */
+
 #include <stdlib.h>
 #include <ti/drivers/I2C.h>
 #include <ti/drivers/UART.h>
@@ -197,9 +198,9 @@ uint8_t GetSensorData(uint8_t *DataPacket) {
             // Get Accelerometer Data
             ADXL355_Get_Accel_Frame(spi, MyADXL.NSamples, s32DataSensor);
             // Add ADXL355 Data to Packet
-            if (MyNode.NBoot==0) {
-                DataPacketLen = Add_s32Data2Packet(DataPacket, DataPacketLen, MyADXL.SensorId, s32DataSensor, 6);
-            }
+//            if (MyNode.NBoot==0 || MyNode.NBoot==1) {
+            DataPacketLen = Add_s32Data2Packet(DataPacket, DataPacketLen, MyADXL.SensorId, s32DataSensor, 6);
+//            }
             UART_write(uart0, "4 ",2); // Debug Message
         }
         // Watchdog_clear(wd);
@@ -226,9 +227,9 @@ uint8_t GetSensorData(uint8_t *DataPacket) {
             s32DataSensor[0] = compensate_pressure(PressureUn, MyCalib);
 
             // Add BME280 Data to Packet
-            if (MyNode.NBoot==1) {
-                DataPacketLen = Add_s32Data2Packet(DataPacket, DataPacketLen, MyBME.SensorId, s32DataSensor, 3);
-            }
+//            if (MyNode.NBoot==1 || MyNode.Mode== MODE_NORMAL_WIFI) {
+            DataPacketLen = Add_s32Data2Packet(DataPacket, DataPacketLen, MyBME.SensorId, s32DataSensor, 3);
+//            }
             UART_write(uart0, "5\r\n ",3); // Debug Message
         }
         free(MyCalib);

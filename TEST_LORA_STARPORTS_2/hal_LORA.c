@@ -23,6 +23,10 @@
 extern UART_Handle uart0;
 extern struct Node MyNode;
 
+extern struct ADXL355_Data MyADXL;
+extern struct BME280_Data MyBME;
+extern struct LDC1000_Data MyLDC;
+
 void Reset_RN2483(void) {
 
     // Activate /MCLR Pin
@@ -452,6 +456,23 @@ uint8_t Mac_Clear_Upctr(UART_Handle uart) {
     }
 }
 
+uint8_t Mac_Set_Pwridx(UART_Handle uart, uint8_t pwridx) {
+    unsigned char Command[256];
+    unsigned char buf[32];
+    uint8_t sz;
+
+    memset(&buf,0, sizeof(buf));
+    sprintf(Command,"mac set pwridx %d\r\n", pwridx);
+    UART_write(uart, (const char *)Command, strlen(Command));
+    sz = GetLine_UART(uart, buf);
+    if (strncmp(buf,"ok",2)!=0) {
+        return ERROR_SET_PWRIDX;
+    } else {
+        return SUCCESS_SET_PWRIDX;
+    }
+
+}
+
 uint8_t Try_Join_Lora_Gateway(UART_Handle uart_dbg, UART_Handle uart_lora) {
 
     uint8_t nf;
@@ -528,6 +549,7 @@ uint8_t Tx_Uncnf_Lora(UART_Handle uart, struct LoraNode *MyLoraNode, uint8_t *ma
     sprintf(Command,"mac tx uncnf %d ", MyLoraNode->PortNoTx);
     strncat(Command,MyLoraNode->DataTx, MyLoraNode->DataLenTx);
     strcat(Command,"\r\n");
+    UART_PRINT("%s\n",Command);
 
     UART_write(uart, Command, strlen(Command));
 
@@ -537,19 +559,24 @@ uint8_t Tx_Uncnf_Lora(UART_Handle uart, struct LoraNode *MyLoraNode, uint8_t *ma
         if (strncmp(buf,"ok",2)==0) {
             ;
         } else if (strncmp(buf,"mac_tx_ok",9)==0) {
+            UART_PRINT("%s\n",buf);
             LastAnswer=TRUE;
             ret = SUCCESS_TX_MAC_TX;
         } else if (strncmp(buf,"mac_rx ",7)==0) {
+            UART_PRINT("ENTRO EN MAC_RX");
             sscanf(buf,"mac_rx %d %s\r\n",&PortNo,payload);
+            UART_PRINT("%s\n",buf);
             sz = hex2int(payload, strlen(payload), bytes);
             GetLoraServerParams(bytes, sz, MyLoraNode);
             *mask = bytes[0];
             *nodeId = (bytes[1]<<8) | bytes[2];
+            LastAnswer=TRUE;
             ret = SUCCESS_TX_MAC_RX;
         } else if (strncmp(buf,"mac_err",7)==0) {
             LastAnswer=TRUE;
             ret = ERROR_TX_MAC_ERR;
         } else if (strncmp(buf,"invalid_data_len",16)==0) {
+            UART_PRINT("INVALID_DATA_LEN");
             LastAnswer=TRUE;
             ret = ERROR_TX_INVALID_DATA_LEN;
         } else if (strncmp(buf,"invalid_param",13)==0) {
@@ -636,51 +663,65 @@ uint8_t Tx_Cnf_Lora(UART_Handle uart, struct LoraNode *MyLoraNode, uint8_t *mask
         sz = GetLine_UART(uart, buf);
         if (strncmp(buf,"ok",2)==0) {
             ;
-        } else if (strncmp(buf,"mac_tx_ok",9)==0) {
+        }else if (strncmp(buf,"mac_tx_ok",9)==0) {
             LastAnswer=TRUE;
+            UART_PRINT("2\r\n");
             ret = SUCCESS_TX_MAC_TX;
-        } else if (strncmp(buf,"mac_rx ",7)==0) {
+        }else if (strncmp(buf,"mac_rx ",7)==0) {
             sscanf(buf,"mac_rx %d %s\r\n",&PortNo,payload);
+            UART_PRINT("3\r\n");
             sz = hex2int(payload, strlen(payload), bytes);
             GetLoraServerParams(bytes, sz, MyLoraNode);
             *mask = bytes[0];
             *nodeId = (bytes[1]<<8) | bytes[2];
             ret = SUCCESS_TX_MAC_RX;
-        } else if (strncmp(buf,"mac_err",7)==0) {
+        }else if (strncmp(buf,"mac_err",7)==0) {
+            UART_PRINT("4\r\n");
             LastAnswer=TRUE;
             ret = ERROR_TX_MAC_ERR;
-        } else if (strncmp(buf,"invalid_data_len",16)==0) {
+        }else if (strncmp(buf,"invalid_data_len",16)==0) {
+            UART_PRINT("5\r\n");
             LastAnswer=TRUE;
             ret = ERROR_TX_INVALID_DATA_LEN;
-        } else if (strncmp(buf,"invalid_param",13)==0) {
+        }else if (strncmp(buf,"invalid_param",13)==0) {
+            UART_PRINT("6\r\n");
             LastAnswer=TRUE;
             ret = ERROR_TX_INVALID_PARAM;
-        } else if (strncmp(buf,"not_joined",10)==0) {
+        }else if (strncmp(buf,"not_joined",10)==0) {
+            UART_PRINT("7\r\n");
             LastAnswer=TRUE;
             ret = ERROR_TX_NOT_JOINED;
-        } else if (strncmp(buf,"no_free_ch",10)==0) {
+        }else if (strncmp(buf,"no_free_ch",10)==0) {
+            UART_PRINT("8\r\n");
             LastAnswer=TRUE;
             ret = ERROR_TX_NO_FREE_CH;
-        } else if (strncmp(buf,"silent",6)==0) {
+        }else if (strncmp(buf,"silent",6)==0) {
+            UART_PRINT("9\r\n");
             LastAnswer=TRUE;
             ret = ERROR_TX_SILENT;
-        } else if (strncmp(buf,"frame_counter_err_rejoin_needed",31)==0) {
+        }else if (strncmp(buf,"frame_counter_err_rejoin_needed",31)==0) {
+            UART_PRINT("10\r\n");
             LastAnswer=TRUE;
             ret = ERROR_TX_REJOIN_NEEDED;
-        } else if (strncmp(buf,"busy",4)==0) {
+        }else if (strncmp(buf,"busy",4)==0) {
+            UART_PRINT("11\r\n");
             LastAnswer=TRUE;
             ret = ERROR_TX_BUSY;
-        } else if (strncmp(buf,"mac_paused",10)==0) {
+        }else if (strncmp(buf,"mac_paused",10)==0) {
+            UART_PRINT("12\r\n");
             LastAnswer=TRUE;
             ret = ERROR_TX_MAC_PAUSED;
-        } else if (strncmp(buf,"invalid_data_len",16)==0) {
+        }else if (strncmp(buf,"invalid_data_len",16)==0) {
+            UART_PRINT("13\r\n");
             LastAnswer=TRUE;
             ret = ERROR_TX_INVALID_DATA_LEN;
         } else {
+            UART_PRINT("14\r\n");
             LastAnswer=TRUE;
             ret = ERROR_TX_UNKNOWN;
         }
     }
+    UART_PRINT(ret);
     return ret;
 }
 
@@ -786,6 +827,7 @@ uint8_t hex2int(unsigned char *hex, uint8_t hlen, uint8_t *bytes) {
     int i;
     int k=0;
 
+    UART_PRINT("ENTRO hex2int\n\r");
     for (i=0;i<hlen;i++) {
         // get current character then increment
         uint8_t mybyte = hex[i];
@@ -796,12 +838,13 @@ uint8_t hex2int(unsigned char *hex, uint8_t hlen, uint8_t *bytes) {
         // shift 4 to make space for new digit, and add the 4 bits of the new digit
 
         val = (val << 4) | (mybyte & 0xF);
-        if (i>0 && (i&0x01)==0) {
+        if ((i&0x01)==1) {
             bytes[k++]=val;
             val = 0;
         }
     }
 
+    UART_PRINT("K= %d\n\r",k);
     return k;   // Returns the size of bytes array
 }
 
@@ -810,33 +853,66 @@ uint8_t GetLoraServerParams(uint8_t *bytes, uint8_t blen, struct LoraNode *MyLor
     uint8_t mask = bytes[0];
     int inext = 1;
 
+    UART_PRINT("mask1= %d\n\r", mask);
+    UART_PRINT("mask2= %d\n\r", mask);
+    UART_PRINT("mask= %d result= %d\n\r", mask, mask&0x10);
+    UART_PRINT("ENTRO EN GetLoraServerParams\n\r");
     if ((mask&0x01)!=0) {   // WakeUpInterval
+        UART_PRINT("ENTRO EN WakeUpInterval\n\r");
         MyNode.WakeUpInterval = (bytes[inext]<<8) | bytes[inext+1];
         inext = inext+2;
+        writeWakeUp(MyNode.WakeUpInterval);
+        st_readFileWakeUp();
     }
 
     if ((mask&0x02)!=0) {
+        UART_PRINT("ENTRO EN mode\n\r");
         MyNode.Mode = (bytes[inext] & 0x07);
         inext = inext+1;
+        writeMode(MyNode.Mode);
+        st_readFileMode();
     }
 
     if ((mask&0x04)!=0) {
-        MyNode.SSID[5] = (char)(bytes[inext]);
-        MyNode.SSID[4] = (char)(bytes[inext+1]);
-        MyNode.SSID[3] = (char)(bytes[inext+2]);
-        MyNode.SSID[2] = (char)(bytes[inext+3]);
-        MyNode.SSID[1] = (char)(bytes[inext+4]);
-        MyNode.SSID[0] = (char)(bytes[inext+5]);
+        UART_PRINT("ENTRO EN ssid\n\r");
+        MyNode.SSID[0] = (char)(bytes[inext]);
+        MyNode.SSID[1] = (char)(bytes[inext+1]);
+        MyNode.SSID[2] = (char)(bytes[inext+2]);
+        MyNode.SSID[3] = (char)(bytes[inext+3]);
+        MyNode.SSID[4] = (char)(bytes[inext+4]);
+        MyNode.SSID[5] = (char)(bytes[inext+5]);
         inext = inext + 6;
+        writeSSID(MyNode.SSID);
+        st_readFileSSID(&(MyNode.SSID));
     }
 
     if ((mask&0x08)!=0) {
+        UART_PRINT("ENTRO EN ncycles\n\r");
         MyNode.NCycles = bytes[inext];
         inext = inext + 1;
+        writeNCycles(MyNode.NCycles);
+        st_readFileNCycles();
     }
 
     if ((mask&0x10)!=0) {
+        UART_PRINT("ENTRO EN if upctr\n\r");
         MyLoraNode->Upctr = (bytes[inext]<<16) | (bytes[inext+1]<<8) | (bytes[inext+2]);
+        inext = inext + 3;
+        writeUpCntr(MyLoraNode->Upctr);
+        st_readFileUpCntr();
+    }
+
+    if ((mask&0x20)!=0) { // ADXL355
+        UART_PRINT("ENTRO EN ADXL355\n\r");
+        MyADXL.SampleRate = (bytes[inext]<<8) | bytes[inext+1];
+        MyADXL.NSamples = (bytes[inext+2]<<8) | bytes[inext+3];
+        inext = inext + 4;
+    }
+
+    if ((mask&0x40)!=0) { // LDC1000
+        UART_PRINT("ENTRO EN LDC1000\n\r");
+        MyLDC.NSamples = (bytes[inext]<<8) | bytes[inext+1];
+        inext = inext + 2;
     }
 
     return 0;
