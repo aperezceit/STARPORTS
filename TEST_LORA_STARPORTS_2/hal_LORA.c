@@ -559,11 +559,11 @@ uint8_t Tx_Uncnf_Lora(UART_Handle uart, struct LoraNode *MyLoraNode, uint8_t *ma
         if (strncmp(buf,"ok",2)==0) {
             ;
         } else if (strncmp(buf,"mac_tx_ok",9)==0) {
-            UART_PRINT("%s\n",buf);
+//            UART_PRINT("%s\n",buf);
             LastAnswer=TRUE;
             ret = SUCCESS_TX_MAC_TX;
         } else if (strncmp(buf,"mac_rx ",7)==0) {
-            UART_PRINT("ENTRO EN MAC_RX");
+//            UART_PRINT("ENTRO EN MAC_RX");
             sscanf(buf,"mac_rx %d %s\r\n",&PortNo,payload);
             UART_PRINT("%s\n",buf);
             sz = hex2int(payload, strlen(payload), bytes);
@@ -576,7 +576,7 @@ uint8_t Tx_Uncnf_Lora(UART_Handle uart, struct LoraNode *MyLoraNode, uint8_t *ma
             LastAnswer=TRUE;
             ret = ERROR_TX_MAC_ERR;
         } else if (strncmp(buf,"invalid_data_len",16)==0) {
-            UART_PRINT("INVALID_DATA_LEN");
+//            UART_PRINT("INVALID_DATA_LEN");
             LastAnswer=TRUE;
             ret = ERROR_TX_INVALID_DATA_LEN;
         } else if (strncmp(buf,"invalid_param",13)==0) {
@@ -601,6 +601,7 @@ uint8_t Tx_Uncnf_Lora(UART_Handle uart, struct LoraNode *MyLoraNode, uint8_t *ma
             LastAnswer=TRUE;
             ret = ERROR_TX_MAC_PAUSED;
         } else if (strncmp(buf,"invalid_data_len",16)==0) {
+//            UART_PRINT("INVALID_DATA_LEN");
             LastAnswer=TRUE;
             ret = ERROR_TX_INVALID_DATA_LEN;
         } else {

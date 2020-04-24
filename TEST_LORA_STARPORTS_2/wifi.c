@@ -223,7 +223,7 @@ int32_t wlanConnectFromFile(unsigned char *ssid)
 
     /* WLAN CONNECT TO AP*/
     ret = sl_WlanConnect((signed char*)SSID_NAME, strlen(SSID_NAME), 0, &secParams, 0);
-    UART_PRINT("Trying to connect to AP : %s\n\r", SSID_NAME);
+//    UART_PRINT("Trying to connect to AP : %s\n\r", SSID_NAME);
 
     sl_Task(NULL);
 
