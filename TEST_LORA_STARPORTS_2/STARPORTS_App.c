@@ -152,24 +152,24 @@ void *mainThread(void *arg0)
     MyNode.WakeUpInterval = st_readFileWakeUp();                                /* Get MyNode.WakeUpInterval --> Read WakeUp_Time File */
     MyNode.Mode = st_readFileMode();                                            /* Get MyNode.Mode --> Read File Mode */
     MyNode.NCycles = st_readFileNCycles();                                      /* Get MyNode.NCycles --> Read File Ncycles */
-    st_readFileSSID(&(MyNode.SSID));                                            /* Get MyNode.SSID[] --> Read SSID File */
-    MyNode.NBoot = st_readFileNBoot();                                          /* Get MyNode.NBoot --> Read NBoot File: (1) or (0) */
+//    st_readFileSSID(&(MyNode.SSID));       NOT NECCESARY FOR TEST             /* Get MyNode.SSID[] --> Read SSID File */
+//    MyNode.NBoot = st_readFileNBoot();     NOT NECCESARY FOR TEST             /* Get MyNode.NBoot --> Read NBoot File: (1) or (0) */
     MyNode.NFails = 0   ;                                                       /* Get MyNode.NFails --> Number of failed attempts to Wireless Connection */
     MyNode.Payload = st_readFilePayload();                                      /* Get MyNode.Payloads --> selects the payload to send */
     MyNode.Cycles = st_readFileCycles();                                        /* Get MyNode.Cycles -- > number of times sending the same paylaod */
     MyNode.Iter = st_readFileIter();                                            /* Get MyNode.Iter -- > payload variable  */
     MyNode.Count = st_readFileCount();                                          /* Get MyNode.Count --> payload variable */
     /************ Ends Reading Configuration Files **************************/
-
+/* NOT NECCESARY FOR TEST
     if (MyNode.NFails>=4) {
-/*
+
 #ifdef DEBUG
         UART_PRINT("NFails > 4, SETTING NODE IN WIFI MODE\n\r");
 #endif
-*/
+
         usleep(2000);
         wlanConf();                                                             /* Setup Node as WiFi and connect to Known Host */
-        wlanConnectFromFile(MyNode.SSID);
+/*        wlanConnectFromFile(MyNode.SSID);
         usleep(2000);
 
         MyNode.NBoot=0;
@@ -177,7 +177,7 @@ void *mainThread(void *arg0)
         MyNode.NFails=0;
         writeNFails(MyNode.NFails);
     }
-
+*/
     /************* Begin Configure Peripherals ***********************/
     RN2483_Clear();                                                             /* Reset the RN2483 */
     i2c = Startup_I2C(Board_I2C0);                                              /* I2C interface started */
@@ -208,8 +208,8 @@ void *mainThread(void *arg0)
         /********** Join ABP ***************/
         ret = Join_Abp_Lora(uart1);
         if (ret==SUCCESS_ABP_LORA) {
-            MyNode.NFails=0;
-            writeNFails(MyNode.NFails);
+//            MyNode.NFails=0;
+//            writeNFails(MyNode.NFails);
             // Continue reading sensors
         } else {
 /*
@@ -218,8 +218,8 @@ void *mainThread(void *arg0)
             UART_write(uart0, "\r\n", 2);
 #endif
 */
-            MyNode.NFails++;                                                    /*  Write NFails File */
-            writeNFails(MyNode.NFails);
+//            MyNode.NFails++;                                                    /*  Write NFails File */
+//            writeNFails(MyNode.NFails);
             NextStep=SHUTDOWN;
         }
 
@@ -232,12 +232,13 @@ void *mainThread(void *arg0)
             usleep(2000);
 
             if (ret==SUCCESS_CONNECT_WIFI) {
-                MyNode.NFails=0;
-                writeNFails(MyNode.NFails);
+//                MyNode.NFails=0;
+//                writeNFails(MyNode.NFails);
 //                UART_PRINT("SUCCESS WIFI CONNECTION\n\r");
+                // Continue reading sensors
             } else {
-                MyNode.NFails++;
-                writeNFails(MyNode.NFails);
+//                MyNode.NFails++;
+//                writeNFails(MyNode.NFails);
 //                UART_PRINT("ERROR CONNECTING WIFI\n\r");
                 NextStep=SHUTDOWN;
             }
@@ -255,7 +256,7 @@ void *mainThread(void *arg0)
     SPI_CS_Disable();                                                           /* Put CS to Logic High */
     spi = Startup_SPI(Board_SPI_MASTER, 8, 5000000);                            /* Configure SPI Master at 5 Mbps, 8-bits, CPOL=0, PHA=0 */
     Timer_init();                                                               /* Start Timer for ADC Timestep */
-    DataPacketLen = GetSensorData(DataPacket);
+//    DataPacketLen = GetSensorData(DataPacket);        NOT NECCESARY FOR TEST
     /************** End Reading Data from Sensors ***********************************/
 
     /* Close all sensor related peripherals */
@@ -270,7 +271,8 @@ void *mainThread(void *arg0)
     I2C_close(i2c);
     I2C_As_GPIO_Low();                                                          /* Puts SCL and SDA signals low to save power */
 
-    MyLoraNode.DataLenTx = Uint8Array2Char(DataPacket, DataPacketLen, &(MyLoraNode.DataTx));
+//    ¿¿¿¿¿MIRAR SI NECESARIO PARA INICIALIZAR LA VARIABLE DE MyLoraNode.DataLenTx MyLoraNode.DataTx
+//    MyLoraNode.DataLenTx = Uint8Array2Char(DataPacket, DataPacketLen, &(MyLoraNode.DataTx));  NOT NECCESARY FOR TEST
 
     /*
      * test paper
@@ -595,24 +597,24 @@ void *mainThread(void *arg0)
         if(status < 0 )
         {
             status = sl_Close(sockId);
-            ASSERT_ON_ERROR(sockId);
+//            ASSERT_ON_ERROR(sockId);
 //            UART_PRINT("\n\rERROR SENDING PACKET: %s\n\r", status);
             Node_Disable();
         }else{
 //            UART_PRINT("\n\rPACKET SENT\n\r");
             status = sl_Close(sockId);
-            writeNBoot(1-MyNode.NBoot);
+//            writeNBoot(1-MyNode.NBoot);       NOT NECCESARY FOR TEST
         }
     }
 
-    writeNBoot(1-MyNode.NBoot);
+//    writeNBoot(1-MyNode.NBoot);           NOT NECCESARY FOR TEST
 /*
 #ifdef DEBUG
     UART_write(uart0, "End of STARPORTS Measures\r\n", 27);
 #endif
 */
     UART_close(uart1);
-    UART_close(uart0);
+//    UART_close(uart0);                NOT NECCESARY FOR TEST
 
     Node_Disable();
 
