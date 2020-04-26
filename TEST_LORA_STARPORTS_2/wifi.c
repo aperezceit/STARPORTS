@@ -234,7 +234,7 @@ int32_t wlanConnectFromFile(unsigned char *ssid)
 
         if((!IS_CONNECTED(PowerMeasure_CB.slStatus)) || (!IS_IP_ACQUIRED(PowerMeasure_CB.slStatus))){
             tries ++;
-            UART_PRINT(".");
+            UART_PRINT("\r\n");
         }
         if(tries==20000){
             Node_Disable();

@@ -224,9 +224,9 @@ void *mainThread(void *arg0)
         }
 
     } else if (MyNode.Mode==MODE_NORMAL_WIFI) {
-            st_readFileSSID(&(MyNode.SSID));                                    /*  Read SSID from file */
+            //st_readFileSSID(&(MyNode.SSID));     NOT NECCESARY FOR TEST       /*  Read SSID from file */
             // Read other params ...
-            usleep(2000);
+            // usleep(2000);
             ret = wlanConf();                                                   /* Setup WiFi */
             ret = wlanConnectFromFile(MyNode.SSID);                             /* Connect WiFi */
             usleep(2000);
@@ -271,7 +271,6 @@ void *mainThread(void *arg0)
     I2C_close(i2c);
     I2C_As_GPIO_Low();                                                          /* Puts SCL and SDA signals low to save power */
 
-//    ¿¿¿¿¿MIRAR SI NECESARIO PARA INICIALIZAR LA VARIABLE DE MyLoraNode.DataLenTx MyLoraNode.DataTx
 //    MyLoraNode.DataLenTx = Uint8Array2Char(DataPacket, DataPacketLen, &(MyLoraNode.DataTx));  NOT NECCESARY FOR TEST
 
     /*

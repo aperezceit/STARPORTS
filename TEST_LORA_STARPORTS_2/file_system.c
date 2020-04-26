@@ -517,7 +517,7 @@ int st_readFileUpCntr()
         }
         if(RetVal < 0)
         {// Error
-            UART_PRINT("sl_FsRead error: %d\n\r", RetVal);
+           // UART_PRINT("sl_FsRead error: %d\n\r", RetVal);
             return RetVal;
         }
         offset += strlen(buffer);
